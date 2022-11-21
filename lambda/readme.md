@@ -13,3 +13,4 @@
     - zip -r ../pull-comments.zip .
     - cd ..
     - zip pull-comments.zip lambda_function.py 
+- upload zip to relevant lambda on aws
