@@ -1,10 +1,10 @@
-##This folder contains the code for the lambda functions required for running insightor.
+## This folder contains the code for the lambda functions required for running insightor.
 
-#List of Lambdas:
+# List of Lambdas:
 - pull-comments
 
 
-#Deploying Lambda:
+# Deploying Lambda:
 - build zip:
     - go to lambda function dir, example: /pull-comments
     - pip freeze
