@@ -1,2 +1,2 @@
 # insightor
-Chrome Extension to provides youtube comment insights
+Chrome Extension to provide youtube comment insights
