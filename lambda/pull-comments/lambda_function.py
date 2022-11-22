@@ -2,10 +2,11 @@ import requests
 import json
 import collections
 import re
+import os
 
 def lambda_handler(event, context):
     video_id = event['queryStringParameters']['videoid']
-    API_KEY = 'AIzaSyCvgb1VAS_W1_KwfOQ7xZzf7dGsuA6a3ng'
+    API_KEY = os.environ['YOU_TUBE']
     URL = 'https://www.googleapis.com/youtube/v3/commentThreads'
 
     params = {
