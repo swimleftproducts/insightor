@@ -1,0 +1,17 @@
+comments = [
+    'Nice work.  It is interesting for me to see hard milling strategies. probably help that is a gantry tool with a 50 taper.',
+    'Pekná práca 👍', 
+    'Great job! Сколько времени ушло на фрезерной обработки?', 
+    'Newbie alert!!Hello,Thank you for another great video.May you please explain why it was necessary to do EDM work on the part? Tolerances? Hole depth? Thank you, Jorge',
+    'Excellent work, I would like to visit them and be able to see their work up close. I also work with cnc machines and wire edm so I love watching all your videos. We see you from Mexico.', 
+    "what's the polishing process like, is there any precision required? or just go at with scotch-brite?",
+    'Привет вам там всем!Отличная работа! Класс! У вас ещё и электроэрозия есть?',
+    'Gorgeous part! 🖖😀', 
+      "Those high feeds go alright wtih such a  low radial stopover? i thought they needed a bit of engagement to direct forces upwards otherwise they'd push off?", 
+      'Güzel işçilik elimize sağlıl', 'quality as always', 
+      '7:45 you should try carbide reamers 🙂',
+       'Very nice work!', 
+      'I must know..... is this a surround for a shot sleeve? It sure looks like one', 
+      'Good work! 👍🤝', 'Yeah, like butter, real art work.', 'Thank u', 
+      'good video cncfrezar',
+       '👌']
