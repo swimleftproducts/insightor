@@ -4,7 +4,8 @@ import pprint
 
 event = {
     'queryStringParameters':{
-        'videoid':'jYUZAF3ePFE'
+        'videoid':'dIUTsFT2MeQ',
+        'maxcomments': '100'
     }
 }
 
