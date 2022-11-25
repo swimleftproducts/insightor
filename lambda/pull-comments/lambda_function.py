@@ -1,15 +1,17 @@
 import json
 import services
 import analysis
+import boto3
+
+lambda_client = boto3.client('lambda')
 
 def lambda_handler(event, context):
     video_id = event['queryStringParameters']['videoid']
-    max_comments = event['queryStringParameters']['maxcomments']
+    max_comments = event['queryStringParameters'].get('maxcomments',400)
     
     pageToken = None
     comments = []
     words = []
-
 
     while True:
         if len(comments) >= int(max_comments):
@@ -30,13 +32,19 @@ def lambda_handler(event, context):
         if len(comments) >= int(max_comments):
             break
     
-    data = analysis.basicAnalysis(words,comments)
+    #analyzedComments = analysis.basicAnalysis(words,comments)
+    
+    lambda_payload = {"comments":comments}
+    response_spacy = lambda_client.invoke(FunctionName='arn:aws:lambda:us-east-1:216068982475:function:testSpacy', 
+                     InvocationType='RequestResponse',
+                     Payload=json.dumps(lambda_payload))
+    analyzedComments = json.load(response_spacy['Payload'])['body']
 
     responseObject = {}
     responseObject['statusCode'] = 200
     responseObject['headers'] = {}
     responseObject['headers']['Content-type'] = 'application/json'
-    responseObject['body'] = json.dumps(data)
+    responseObject['body'] = json.dumps(analyzedComments)
 
     return responseObject
 
