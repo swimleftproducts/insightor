@@ -2,6 +2,11 @@
 
 ## List of Lambdas:
 - pull-comments
+- spacy
+
+## required env variable
+- YOU_TUBE - api key for youtube
+-- export YOU_TUBE=xxxxxxxxxxxxxxxxxxx
 
 
 ## Deploying Lambda:

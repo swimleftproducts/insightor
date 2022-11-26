@@ -37,7 +37,7 @@ def lambda_handler(event, context):
     
     analyzedComments = analysis.basicAnalysis(words,comments)
     
-    #lambda_payload = {"comments":comments}
+    # lambda_payload = {"comments":comments}
     # response_spacy = lambda_client.invoke(FunctionName='arn:aws:lambda:us-east-1:216068982475:function:testSpacy', 
     #                  InvocationType='RequestResponse',
     #                  Payload=json.dumps(lambda_payload))

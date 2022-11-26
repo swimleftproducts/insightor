@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import {createRoot} from 'react-dom/client'
+import Button from '../popup/components/button'
 
 const Container = styled.div`
     * {
@@ -19,6 +20,7 @@ const App = () => {
     return (
         <Container>
             <h1>Options Page</h1>
+            <Button/>
         </Container>
     )
 }

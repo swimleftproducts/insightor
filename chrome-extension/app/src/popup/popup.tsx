@@ -2,6 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import {createRoot} from 'react-dom/client'
 import TechIcon from '../static/tech_icon.png'
+import Button from './components/button'
 
 const Container = styled.div`
     * {
@@ -9,7 +10,7 @@ const Container = styled.div`
     padding: 0;
     }
     color: HotPink;
-    background: black;
+    background: tan;
     width: 400px;
     height: 450px;
     padding: 0px;
@@ -19,8 +20,10 @@ const Container = styled.div`
 const App = () => {
     return (
         <Container>
+            {process.env.LAMBDA_URL}
             <h1>INSIGHTOR</h1>
             <img src={TechIcon}/>
+            <Button/>
         </Container>
     )
 }
