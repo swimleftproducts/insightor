@@ -1,9 +1,11 @@
 import json
+import requests
 import services
 import analysis
 import boto3
 
 lambda_client = boto3.client('lambda')
+session = requests.Session()
 
 def lambda_handler(event, context):
     video_id = event['queryStringParameters']['videoid']
@@ -13,11 +15,12 @@ def lambda_handler(event, context):
     comments = []
     words = []
 
+
     while True:
         if len(comments) >= int(max_comments):
             break
         
-        response = services.makeYouTubeCall(video_id, pageToken=pageToken)
+        response = services.makeYouTubeCall(session, video_id, pageToken=pageToken)
 
         if response.status_code != 200:
             return services.handle_error(response)
@@ -32,13 +35,13 @@ def lambda_handler(event, context):
         if len(comments) >= int(max_comments):
             break
     
-    #analyzedComments = analysis.basicAnalysis(words,comments)
+    analyzedComments = analysis.basicAnalysis(words,comments)
     
-    lambda_payload = {"comments":comments}
-    response_spacy = lambda_client.invoke(FunctionName='arn:aws:lambda:us-east-1:216068982475:function:testSpacy', 
-                     InvocationType='RequestResponse',
-                     Payload=json.dumps(lambda_payload))
-    analyzedComments = json.load(response_spacy['Payload'])['body']
+    #lambda_payload = {"comments":comments}
+    # response_spacy = lambda_client.invoke(FunctionName='arn:aws:lambda:us-east-1:216068982475:function:testSpacy', 
+    #                  InvocationType='RequestResponse',
+    #                  Payload=json.dumps(lambda_payload))
+    # analyzedComments = json.load(response_spacy['Payload'])['body']
 
     responseObject = {}
     responseObject['statusCode'] = 200

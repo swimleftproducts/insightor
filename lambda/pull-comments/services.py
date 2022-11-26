@@ -5,7 +5,9 @@ import json
 API_KEY = os.environ['YOU_TUBE']
 URL = 'https://www.googleapis.com/youtube/v3/commentThreads'
 
-def makeYouTubeCall(video_id,pageToken=None):
+
+
+def makeYouTubeCall(session, video_id,pageToken=None):
     params = {
         'videoId':video_id,
         'key': API_KEY,
@@ -14,7 +16,7 @@ def makeYouTubeCall(video_id,pageToken=None):
     }
     if pageToken:
         params['pageToken'] = pageToken
-    response= requests.get(URL, params=params)
+    response= session.get(URL, params=params)
     return response
 
 def handle_error( response):
