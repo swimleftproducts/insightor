@@ -12,7 +12,8 @@ def makeYouTubeCall(session, video_id,pageToken=None):
         'videoId':video_id,
         'key': API_KEY,
         'part':'snippet',
-        'order':'relevance'
+        'order':'relevance',
+        'maxResults': 100
     }
     if pageToken:
         params['pageToken'] = pageToken

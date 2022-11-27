@@ -5,7 +5,7 @@
 - spacy
 
 ## required env variable
-- YOU_TUBE - api key for youtube
+- YOU_TUBE - pull-comments - api key for youtube
 -- export YOU_TUBE=xxxxxxxxxxxxxxxxxxx
 
 
@@ -24,3 +24,5 @@
     - make a layer
     - upload the layer to aws
     - just zip the lambda_function.py
+
+-make layer

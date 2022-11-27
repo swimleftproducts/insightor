@@ -1,29 +1,65 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import {createRoot} from 'react-dom/client'
-import TechIcon from '../static/tech_icon.png'
-import Button from './components/button'
+import Title from './components/title'
+import WordDisplayContainer from './components/word-display/word-display-container'
+import getAnalysis from './services/analysis'
+import axios from 'axios'
 
 const Container = styled.div`
-    * {
+    html {
     margin: 0;
     padding: 0;
     }
-    color: HotPink;
-    background: tan;
+    color: black;
+    background: white;
+    flex-direction: column;
+    display: flex;
     width: 400px;
-    height: 450px;
     padding: 0px;
     margin: 0px;
 `
 
 const App = () => {
+    const [videoId, setVideoId] = useState<null|string>(null)
+    const [commentData, setCommentData] = useState<any>(null)
+   
+    useEffect(()=>{
+        console.log('getting url')
+        const getURL = async () => {
+            let videoId
+            chrome.tabs.query({currentWindow: true, active: true}, function (tabs){
+                const url = new URL(tabs[0].url);
+                const params = new URLSearchParams(url.search)
+                videoId = params.get('v')
+                if (videoId) {
+                    setVideoId(videoId)
+                }
+            });
+        }
+        getURL()
+    },[])
+    const API_URL = 'https://sbk957ltol.execute-api.us-east-1.amazonaws.com/test/getanalysis'
+    
+    useEffect(()=> {
+        if (!videoId) return
+        const getData = async (videoId) => {
+            try{
+                const {data, status} = await axios.get(API_URL,{
+                    params: {videoid: videoId, maxcomments: 250},
+                })
+                setCommentData(data)
+           }catch (error) {
+                console.log(error)
+           }
+        }
+        getData(videoId)
+    },[videoId])
+
     return (
         <Container>
-            {process.env.LAMBDA_URL}
-            <h1>INSIGHTOR</h1>
-            <img src={TechIcon}/>
-            <Button/>
+            <Title title={`Insightor: ${videoId}`}/>
+            <WordDisplayContainer commentData={commentData}/>
         </Container>
     )
 }

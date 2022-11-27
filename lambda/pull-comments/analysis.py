@@ -1,47 +1,55 @@
 import collections
 import re
+from utils import getStopWords
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 def basicAnalysis(words, comments):
     regex = re.compile('[^a-zA-Z]')
-    common_words = ["","i", "me", "my", "myself", "we", "our", "ours", "ourselves", 
-    "you", "your", "yours", "yourself", "yourselves", "he", "him", "his", "himself",
-     "she", "her", "hers", "herself", "it", "its", "itself", "they", "them", "their", 
-     "theirs", "themselves", "what", "which", "who", "whom", "this", "that", "these", 
-     "those", "am", "is", "are", "was", "were", "be", "been", "being", "have", "has", 
-     "had", "having", "do", "does", "did", "doing", "a", "an", "the", "and", "but", 
-     "if", "or", "because", "as", "until", "while", "of", "at", "by", "for", "with",
-      "about", "against", "between", "into", "through", "during", "before", "after", 
-      "above", "below", "to", "from", "up", "down", "in", "out", "on", "off", "over", 
-      "under", "again", "further", "then", "once", "here", "there", "when", "where",
-       "why", "how", "all", "any", "both", "each", "few", "more", "most", "other", 
-       "some", "such", "no", "nor", "not", "only", "own", "same", "so", "than", "too", 
-       "very", "s", "t", "can", "will", "just", "don", "should", "now"]
+    common_words = getStopWords()
+    
     clean_words =[]
     long_words=[]
     really_long_words = []
-    for each in words:
+    for each in words:   
         each = each.lower()
         each = regex.sub('',each)
+
+        if len(each)<4:
+            continue
         if each in common_words:
             continue
         if len(each) > 7:
-            really_long_words = really_long_words + [each]
-            clean_words = clean_words + [each]
+            really_long_words.append(each)
+            clean_words.append(each)
             continue  
         if len(each) > 5:
-            long_words = long_words + [each]
-            clean_words = clean_words + [each]
+            long_words.append(each)
+            clean_words.append(each)
             continue
               
-        clean_words = clean_words + [each]
+        clean_words.append(each)
 
     Counter = collections.Counter(clean_words)
-    most_occur = Counter.most_common(6)
+    most_occur = Counter.most_common(10)
+
+    Counter = collections.Counter(long_words)
+    long_words = Counter.most_common(6)
+
+    Counter = collections.Counter(really_long_words)
+    really_long_words = Counter.most_common(6)
+
+
+    sentiments = []
+    for comment in comments:
+        sid_obj = SentimentIntensityAnalyzer()
+        sentiment_dict = sid_obj.polarity_scores(comment)
+        sentiments.append(sentiment_dict['compound']) 
 
     response =  {
-        'comments': comments,
+        'comments': len(comments),
+        'sentiments': sentiments,
         'most_occur': most_occur[:10],
-        'long_words': long_words[:10],
+        'long_words': long_words[:15],
         'really_long_words': really_long_words[:10],
     }
     return response
