@@ -5,6 +5,7 @@ import Title from './components/title'
 import WordDisplayContainer from './components/word-display/word-display-container'
 import getAnalysis from './services/analysis'
 import axios from 'axios'
+import SentimentDisplayContainer from './components/sentiment-display/sentiment-display-container'
 
 const Container = styled.div`
     html {
@@ -45,10 +46,20 @@ const App = () => {
         if (!videoId) return
         const getData = async (videoId) => {
             try{
-                const {data, status} = await axios.get(API_URL,{
-                    params: {videoid: videoId, maxcomments: 250},
-                })
-                setCommentData(data)
+                if (localStorage.getItem('videoId') !== videoId){
+                    console.log('making request')
+                    const {data, status} = await axios.get(API_URL,{
+                        params: {videoid: videoId, maxcomments: 250},
+                    })
+                    setCommentData(data)
+                    localStorage.setItem('videoId',videoId)
+                    localStorage.setItem('data', JSON.stringify(data))
+                    console.log(data.sentiments)
+                } else{
+                    let data = JSON.parse(localStorage.getItem('data'))
+                    setCommentData(data)
+                    console.log(data.sentiments)
+                }
            }catch (error) {
                 console.log(error)
            }
@@ -60,10 +71,10 @@ const App = () => {
         <Container>
             <Title title={`Insightor: ${videoId}`}/>
             <WordDisplayContainer commentData={commentData}/>
+            <SentimentDisplayContainer sentiments={commentData?.sentiments}/>
         </Container>
     )
 }
-
 
 const body = document.body 
 body.style.margin = "0"

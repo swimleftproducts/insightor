@@ -11,26 +11,26 @@ def lambda_handler(event, context):
     nlp = spacy.load('en_core_web_sm')
     doc =nlp(all_comments)
     
-    # all tokens that arent stop words or punctuations
-    words = [token.text for token in doc if not token.is_stop and not token.is_punct and (token.text != ' ')]
-    longWords = [token.text for token in doc if not token.is_stop and not token.is_punct and (len(token.text) > 6)]
-    # five most common tokens
-    word_freq = Counter(words)
-    long_word_freq = Counter(longWords)
+    words = []
+    for token in doc:
+        if len(token) < 4:
+            continue
+        if token.is_stop:
+            continue
+        if token.is_punct:
+            continue
+        if token.text == ' ' or token.text == '\n':
+            continue 
+        words.append((token.text, token.pos_))
+
+    words_counted = Counter(words).most_common(len(words))
     
-    common_words = word_freq.most_common(10)
-    long_common_words = long_word_freq.most_common(5)
 
-
-
-    responseObject = {}
-    responseObject['statusCode'] = 200
-    responseObject['headers'] = {}
-    responseObject['headers']['Content-type'] = 'application/json'
-    responseObject['body'] = json.dumps({
-        "common_words":common_words,
-        "long_common_words": long_common_words
-    })
-
-    return responseObject
+    def format_words(list_per_word):
+        formated_list = [list_per_word[0][0], list_per_word[0][1],list_per_word[1]]
+        return formated_list
+    
+    formated_words_counted = map(format_words, words_counted)
+  
+    return {'words': list(formated_words_counted)}
 

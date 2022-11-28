@@ -3,6 +3,15 @@ import re
 from utils import getStopWords
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
+
+def getSentiments(comments):
+    sentiments = []
+    for comment in comments:
+        sid_obj = SentimentIntensityAnalyzer()
+        sentiment_dict = sid_obj.polarity_scores(comment)
+        sentiments.append(sentiment_dict['compound']) 
+    return sentiments
+
 def basicAnalysis(words, comments):
     regex = re.compile('[^a-zA-Z]')
     common_words = getStopWords()
@@ -39,15 +48,10 @@ def basicAnalysis(words, comments):
     really_long_words = Counter.most_common(6)
 
 
-    sentiments = []
-    for comment in comments:
-        sid_obj = SentimentIntensityAnalyzer()
-        sentiment_dict = sid_obj.polarity_scores(comment)
-        sentiments.append(sentiment_dict['compound']) 
+    
 
     response =  {
         'comments': len(comments),
-        'sentiments': sentiments,
         'most_occur': most_occur[:10],
         'long_words': long_words[:15],
         'really_long_words': really_long_words[:10],

@@ -2,6 +2,117 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./src/popup/components/sentiment-display/sentiment-display-container.tsx":
+/*!********************************************************************************!*\
+  !*** ./src/popup/components/sentiment-display/sentiment-display-container.tsx ***!
+  \********************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! styled-components */ "./node_modules/styled-components/dist/styled-components.browser.esm.js");
+/* harmony import */ var _sentiment_display__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./sentiment-display */ "./src/popup/components/sentiment-display/sentiment-display.tsx");
+/* harmony import */ var d3__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! d3 */ "./node_modules/d3/src/index.js");
+
+
+
+
+const Container = styled_components__WEBPACK_IMPORTED_MODULE_3__["default"].div `
+    display: flex;
+    flex-direction: column;
+    align-items:center;
+    justify-content: center;
+    height: 200px;
+    width: 100%;
+    border: 1px solid grey;
+    margin: 5px;
+`;
+const BINS = 21;
+const SentimentDisplayContainer = ({ sentiments }) => {
+    const [histogramData, setHistogramData] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
+    const binSentiments = (sentiments, bins) => {
+        // bin from -1 to 1 in <bin> bins
+        let binGenerator = d3__WEBPACK_IMPORTED_MODULE_2__.bin().domain([-1, 1]).thresholds(bins);
+        let binned = binGenerator(sentiments);
+        let histogramData = binned.map((item) => {
+            return item.length;
+        });
+        console.log('data', histogramData);
+        return histogramData;
+    };
+    (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+        if (!sentiments)
+            return;
+        const zeroRemovedSentiment = sentiments.filter((value) => value !== 0);
+        let histogramData = binSentiments(zeroRemovedSentiment, BINS);
+        setHistogramData(histogramData);
+    }, [sentiments]);
+    return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Container, null,
+        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_sentiment_display__WEBPACK_IMPORTED_MODULE_1__["default"], { sentiments: histogramData }),
+        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, "Sentiment analysis")));
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (SentimentDisplayContainer);
+
+
+/***/ }),
+
+/***/ "./src/popup/components/sentiment-display/sentiment-display.tsx":
+/*!**********************************************************************!*\
+  !*** ./src/popup/components/sentiment-display/sentiment-display.tsx ***!
+  \**********************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! styled-components */ "./node_modules/styled-components/dist/styled-components.browser.esm.js");
+
+
+const Container = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div `
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: end;
+    width: 350px;
+    height: 200px;
+  
+`;
+const Bar = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div `
+    width: ${props => props.width}px;
+    height: ${props => props.height}px;
+    background: ${props => `rgb(${props.red},0,0)`};
+`;
+const SentimentDisplay = ({ sentiments }) => {
+    const MAX_BAR_HEIGHT = 150;
+    const WIDTH = 300;
+    const CreateBar = (position, value) => {
+        let maxValue = Math.max(...sentiments);
+        console.log(maxValue);
+        const height = value / maxValue * MAX_BAR_HEIGHT;
+        return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Bar, { height: height, red: 255, key: position, width: WIDTH / sentiments.length }));
+    };
+    const makeBars = () => {
+        if (!sentiments)
+            return;
+        const bars = sentiments.map((bin, idx) => {
+            return CreateBar(idx, bin);
+        });
+        return bars;
+    };
+    return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Container, null, makeBars()));
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (SentimentDisplay);
+
+
+/***/ }),
+
 /***/ "./src/popup/components/title.tsx":
 /*!****************************************!*\
   !*** ./src/popup/components/title.tsx ***!
@@ -191,13 +302,18 @@ const Container = styled_components__WEBPACK_IMPORTED_MODULE_2__["default"].div 
     display: flex;
     flex-direction: column;
     min-height: 250px;
+    max-height: 4250px;
 `;
-const words = [['apple', 'PROPN', 3], ['be', 'AUX', 3], ['look', 'VERB', 5], ['buy', 'VERB', 1],
-    ['very', 'ADJ', 8], ['girl', 'NOUN', 5], ['woah', 'INTJ', 7], ['tomorrow', 'ADV', 2],
-    ['interesting', 'ADJ', 7], ['hardware', 'NOUN', 16], ['awesome', 'ADJ', 8], ['technology', 'NOUN', 9]
-];
+const Loading = styled_components__WEBPACK_IMPORTED_MODULE_2__["default"].div `
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    color: darkgrey;
+`;
 const WordDisplayContainer = ({ commentData }) => {
     const [detailWord, setDetailWord] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
+    const [words, setWords] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('');
     const handleBubbleClick = (word) => {
         console.log('word clicked is', word);
         setDetailWord({
@@ -210,8 +326,12 @@ const WordDisplayContainer = ({ commentData }) => {
         });
     };
     const clearBubbleDetail = () => setDetailWord(null);
-    return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Container, null,
-        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_word_display__WEBPACK_IMPORTED_MODULE_1__["default"], { onClick: clearBubbleDetail, words: words, detailWord: detailWord, handleBubbleClick: handleBubbleClick })));
+    (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+        if (commentData) {
+            setWords(commentData === null || commentData === void 0 ? void 0 : commentData.words);
+        }
+    }, [commentData]);
+    return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Container, null, words ? react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_word_display__WEBPACK_IMPORTED_MODULE_1__["default"], { onClick: clearBubbleDetail, words: words.slice(0, 20), detailWord: detailWord, handleBubbleClick: handleBubbleClick }) : react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Loading, null, "Loading")));
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (WordDisplayContainer);
 
@@ -265,11 +385,12 @@ const WordDisplay = ({ words, detailWord, handleBubbleClick, onClick }) => {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! styled-components */ "./node_modules/styled-components/dist/styled-components.browser.esm.js");
+/* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! styled-components */ "./node_modules/styled-components/dist/styled-components.browser.esm.js");
 /* harmony import */ var react_dom_client__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-dom/client */ "./node_modules/react-dom/client.js");
 /* harmony import */ var _components_title__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/title */ "./src/popup/components/title.tsx");
 /* harmony import */ var _components_word_display_word_display_container__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/word-display/word-display-container */ "./src/popup/components/word-display/word-display-container.tsx");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var _components_sentiment_display_sentiment_display_container__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/sentiment-display/sentiment-display-container */ "./src/popup/components/sentiment-display/sentiment-display-container.tsx");
 var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -285,7 +406,8 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 
 
 
-const Container = styled_components__WEBPACK_IMPORTED_MODULE_4__["default"].div `
+
+const Container = styled_components__WEBPACK_IMPORTED_MODULE_5__["default"].div `
     html {
     margin: 0;
     padding: 0;
@@ -322,10 +444,21 @@ const App = () => {
             return;
         const getData = (videoId) => __awaiter(void 0, void 0, void 0, function* () {
             try {
-                const { data, status } = yield axios__WEBPACK_IMPORTED_MODULE_5__["default"].get(API_URL, {
-                    params: { videoid: videoId, maxcomments: 250 },
-                });
-                setCommentData(data);
+                if (localStorage.getItem('videoId') !== videoId) {
+                    console.log('making request');
+                    const { data, status } = yield axios__WEBPACK_IMPORTED_MODULE_6__["default"].get(API_URL, {
+                        params: { videoid: videoId, maxcomments: 250 },
+                    });
+                    setCommentData(data);
+                    localStorage.setItem('videoId', videoId);
+                    localStorage.setItem('data', JSON.stringify(data));
+                    console.log(data.sentiments);
+                }
+                else {
+                    let data = JSON.parse(localStorage.getItem('data'));
+                    setCommentData(data);
+                    console.log(data.sentiments);
+                }
             }
             catch (error) {
                 console.log(error);
@@ -335,7 +468,8 @@ const App = () => {
     }, [videoId]);
     return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Container, null,
         react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_title__WEBPACK_IMPORTED_MODULE_2__["default"], { title: `Insightor: ${videoId}` }),
-        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_word_display_word_display_container__WEBPACK_IMPORTED_MODULE_3__["default"], { commentData: commentData })));
+        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_word_display_word_display_container__WEBPACK_IMPORTED_MODULE_3__["default"], { commentData: commentData }),
+        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_sentiment_display_sentiment_display_container__WEBPACK_IMPORTED_MODULE_4__["default"], { sentiments: commentData === null || commentData === void 0 ? void 0 : commentData.sentiments })));
 };
 const body = document.body;
 body.style.margin = "0";
@@ -524,7 +658,7 @@ root.render(react__WEBPACK_IMPORTED_MODULE_0___default().createElement(App, null
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
-/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_react-dom_client_js-node_modules_styled-components_dist_styled-component-830dfd","vendors-node_modules_axios_lib_axios_js"], () => (__webpack_require__("./src/popup/popup.tsx")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_react-dom_client_js-node_modules_styled-components_dist_styled-component-830dfd","vendors-node_modules_axios_lib_axios_js-node_modules_d3_src_index_js"], () => (__webpack_require__("./src/popup/popup.tsx")))
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	
 /******/ })()

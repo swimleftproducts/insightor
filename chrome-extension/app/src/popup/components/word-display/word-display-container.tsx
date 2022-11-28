@@ -1,37 +1,40 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import WordDisplay from './word-display'
 
-type singleWord = [
-    string, string, number
-]
+
 type  detailWordType =  {
     word: string,
     comments: string[]
 }
 interface WordDisplayContainerProps {
-    commentData: any,
+    commentData: {
+        comments: string[],
+        sentiments: number[],
+        words: [string, string, number][]
+    },
 }
 
 const Container = styled.div`
     display: flex;
     flex-direction: column;
     min-height: 250px;
+    max-height: 4250px;
 `
-
-const words: singleWord[] = [['apple', 'PROPN' ,3], ['be','AUX' ,3],['look','VERB',5],['buy','VERB',1],
-['very','ADJ',8],['girl','NOUN',5],['woah','INTJ',7],['tomorrow','ADV',2],
-['interesting','ADJ',7], ['hardware','NOUN',16],['awesome','ADJ',8],['technology','NOUN',9]
-]
-
+const Loading = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    color: darkgrey;
+`
 
 const WordDisplayContainer = ({commentData}: WordDisplayContainerProps) => {
     const [detailWord, setDetailWord] = useState<detailWordType | null>(null)
+    const [words, setWords] = useState<any>('')
     
+  
     
-
-
-
 
     const handleBubbleClick = (word: string) => {
         console.log('word clicked is', word)
@@ -46,9 +49,16 @@ const WordDisplayContainer = ({commentData}: WordDisplayContainerProps) => {
     }
     const clearBubbleDetail = () => setDetailWord(null)
 
+    useEffect(()=>{
+        if(commentData){
+            setWords(commentData?.words)
+        }
+    },[commentData])
+
     return (
         <Container>
-                <WordDisplay onClick={clearBubbleDetail} words={words} detailWord={detailWord} handleBubbleClick={handleBubbleClick}/>
+                {words ? <WordDisplay onClick={clearBubbleDetail} words={words.slice(0,20)} detailWord={detailWord} handleBubbleClick={handleBubbleClick}/> : <Loading>Loading</Loading>}
+                
         </Container>
     )
 }

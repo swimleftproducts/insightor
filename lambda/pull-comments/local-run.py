@@ -6,7 +6,7 @@ import json
 event = {
     'queryStringParameters':{
         'videoid':'4KiO8GRgwDk',
-        'maxcomments': 500
+        'maxcomments': 20
     }
 }
 

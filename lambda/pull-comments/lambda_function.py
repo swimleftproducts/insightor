@@ -15,16 +15,12 @@ def lambda_handler(event, context):
     comments = []
     words = []
 
-
     while True:
         if len(comments) >= int(max_comments):
             break
-        
         response = services.makeYouTubeCall(session, video_id, pageToken=pageToken)
-
         if response.status_code != 200:
             return services.handle_error(response)
-            
         body = response.json()
         services.getWordsAndComments(body, words, comments)
 
@@ -35,13 +31,17 @@ def lambda_handler(event, context):
         if len(comments) >= int(max_comments):
             break
     
-    analyzedComments = analysis.basicAnalysis(words,comments)
+    analyzedComments = {}
+    # analyzedComments = analysis.basicAnalysis(words,comments)
+    analyzedComments['sentiments'] = analysis.getSentiments(comments)
     
-    # lambda_payload = {"comments":comments}
-    # response_spacy = lambda_client.invoke(FunctionName='arn:aws:lambda:us-east-1:216068982475:function:testSpacy', 
-    #                  InvocationType='RequestResponse',
-    #                  Payload=json.dumps(lambda_payload))
-    # analyzedComments = json.load(response_spacy['Payload'])['body']
+    lambda_payload = {"comments":comments}
+    response_spacy = lambda_client.invoke(FunctionName='arn:aws:lambda:us-east-1:216068982475:function:testSpacy', 
+                      InvocationType='RequestResponse',
+                      Payload=json.dumps(lambda_payload))
+    tokenized_words = json.load(response_spacy['Payload'])
+    analyzedComments['words'] = tokenized_words
+    analyzedComments['comments'] = comments
 
     responseObject = {}
     responseObject['statusCode'] = 200
