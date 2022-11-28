@@ -26,18 +26,19 @@ const Container = styled_components__WEBPACK_IMPORTED_MODULE_3__["default"].div 
     flex-direction: column;
     align-items:center;
     justify-content: center;
-    height: 200px;
+    height: 180px;
     width: 100%;
     border: 1px solid grey;
     margin: 5px;
 `;
-const BINS = 21;
+const BINS = 20;
 const SentimentDisplayContainer = ({ sentiments }) => {
     const [histogramData, setHistogramData] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
     const binSentiments = (sentiments, bins) => {
         // bin from -1 to 1 in <bin> bins
         let binGenerator = d3__WEBPACK_IMPORTED_MODULE_2__.bin().domain([-1, 1]).thresholds(bins);
         let binned = binGenerator(sentiments);
+        console.log('binned', binned);
         let histogramData = binned.map((item) => {
             return item.length;
         });
@@ -81,28 +82,29 @@ const Container = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div 
     justify-content: center;
     align-items: end;
     width: 350px;
-    height: 200px;
+    height: 180px;
   
 `;
 const Bar = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div `
     width: ${props => props.width}px;
     height: ${props => props.height}px;
-    background: ${props => `rgb(${props.red},0,0)`};
+    background: ${({ totalBins, position }) => `rgb(${(255 * position) / totalBins},0,${(255 * (totalBins - position)) / totalBins})`};
 `;
 const SentimentDisplay = ({ sentiments }) => {
     const MAX_BAR_HEIGHT = 150;
     const WIDTH = 300;
-    const CreateBar = (position, value) => {
+    const CreateBar = (position, value, bins) => {
         let maxValue = Math.max(...sentiments);
         console.log(maxValue);
         const height = value / maxValue * MAX_BAR_HEIGHT;
-        return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Bar, { height: height, red: 255, key: position, width: WIDTH / sentiments.length }));
+        return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Bar, { height: height, position: position, totalBins: bins, key: position, width: WIDTH / sentiments.length }));
     };
     const makeBars = () => {
         if (!sentiments)
             return;
-        const bars = sentiments.map((bin, idx) => {
-            return CreateBar(idx, bin);
+        let totalBins = sentiments.length;
+        const bars = sentiments.map((value, idx) => {
+            return CreateBar(idx, value, totalBins);
         });
         return bars;
     };

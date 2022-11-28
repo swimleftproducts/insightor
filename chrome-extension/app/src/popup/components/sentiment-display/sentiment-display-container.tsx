@@ -13,12 +13,12 @@ const Container = styled.div`
     flex-direction: column;
     align-items:center;
     justify-content: center;
-    height: 200px;
+    height: 180px;
     width: 100%;
     border: 1px solid grey;
     margin: 5px;
 `
-const BINS = 21
+const BINS = 20
 const SentimentDisplayContainer = ({sentiments}: SentimentDisplayContainerProps) => {
     const [histogramData, setHistogramData] = useState(null)
 
@@ -26,6 +26,7 @@ const SentimentDisplayContainer = ({sentiments}: SentimentDisplayContainerProps)
         // bin from -1 to 1 in <bin> bins
         let binGenerator = d3.bin().domain([-1,1]).thresholds(bins)
         let binned = binGenerator(sentiments)
+        console.log('binned', binned)
         let histogramData = binned.map((item)=>{
             return item.length
         })

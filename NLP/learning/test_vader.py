@@ -37,14 +37,14 @@ def sentiment_scores(sentence):
 # Driver code
 if __name__ == "__main__" :
  
-    print("\n1st statement :")
+    print("He's the most honest CEO ever.")
     sentence = "❤"
  
     # function calling
     sentiment_scores(sentence)
  
     print("\n2nd Statement :")
-    sentence = "love"
+    sentence = 'Police: "El Chapo is the worst drug lord ever, Martin Shkreli: "Hold my beer..."'
     sentiment_scores(sentence)
  
     print("\n3rd Statement :")
