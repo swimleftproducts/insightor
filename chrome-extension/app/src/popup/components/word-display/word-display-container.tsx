@@ -32,19 +32,22 @@ const Loading = styled.div`
 const WordDisplayContainer = ({commentData}: WordDisplayContainerProps) => {
     const [detailWord, setDetailWord] = useState<detailWordType | null>(null)
     const [words, setWords] = useState<any>('')
-    
-  
-    
 
     const handleBubbleClick = (word: string) => {
-        console.log('word clicked is', word)
+        // serach for word in comments. return first three
+        const searchResults = commentData.comments.filter((comment, idx) =>{
+            return comment.toLocaleLowerCase().includes(word.toLowerCase())
+        })
+        
+        //todo: I should just use ellipsies in the display
+        const reducedWordCountComments = searchResults.slice(0,3).map((comment) => {
+            let shortComment = comment.slice(0, 150) 
+           return shortComment += '...'
+        })
+
         setDetailWord({
             word: word,
-            comments: [
-                'this is one',
-                'this is another',
-                'this is a last one'
-            ]
+            comments: reducedWordCountComments
         })
     }
     const clearBubbleDetail = () => setDetailWord(null)

@@ -2,6 +2,60 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./src/popup/components/sentiment-display/sentiment-comment-display.tsx":
+/*!******************************************************************************!*\
+  !*** ./src/popup/components/sentiment-display/sentiment-comment-display.tsx ***!
+  \******************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! styled-components */ "./node_modules/styled-components/dist/styled-components.browser.esm.js");
+
+
+const Container = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div `
+    display: flex;
+    flex-direction: column;
+    max-height: 250px;
+    padding: 20px ;
+    overflow-y: auto;
+    overflow-x: hidden;
+`;
+const Row = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div `
+    display: flex;
+    flex-direction: row;
+    width: 400px;
+    justify-content: start;
+    align-items: center;
+    margin: 6px 0px;
+`;
+const Sentiment = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div `
+    font-size: 18px;
+    color: darkgrey;
+`;
+const Comment = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div `
+    margin-left: 12px;
+`;
+const SentimentCommentDisplay = ({ comments, setShowSentimentComments }) => {
+    const renderComments = () => {
+        comments = comments.slice(0, 3);
+        return comments.map((comment, idx) => {
+            return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Row, { key: idx, onClick: () => setShowSentimentComments(false) },
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Sentiment, null, comment[1]),
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Comment, null, comment[0])));
+        });
+    };
+    return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Container, null, renderComments()));
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (SentimentCommentDisplay);
+
+
+/***/ }),
+
 /***/ "./src/popup/components/sentiment-display/sentiment-display-container.tsx":
 /*!********************************************************************************!*\
   !*** ./src/popup/components/sentiment-display/sentiment-display-container.tsx ***!
@@ -14,35 +68,50 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! styled-components */ "./node_modules/styled-components/dist/styled-components.browser.esm.js");
+/* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! styled-components */ "./node_modules/styled-components/dist/styled-components.browser.esm.js");
 /* harmony import */ var _sentiment_display__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./sentiment-display */ "./src/popup/components/sentiment-display/sentiment-display.tsx");
 /* harmony import */ var d3__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! d3 */ "./node_modules/d3/src/index.js");
+/* harmony import */ var _sentiment_comment_display__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./sentiment-comment-display */ "./src/popup/components/sentiment-display/sentiment-comment-display.tsx");
 
 
 
 
-const Container = styled_components__WEBPACK_IMPORTED_MODULE_3__["default"].div `
+
+const Container = styled_components__WEBPACK_IMPORTED_MODULE_4__["default"].div `
     display: flex;
     flex-direction: column;
     align-items:center;
     justify-content: center;
     height: 180px;
-    width: 100%;
+    
     border: 1px solid grey;
-    margin: 5px;
+    margin: 15px;
+    
 `;
 const BINS = 20;
-const SentimentDisplayContainer = ({ sentiments }) => {
+const SentimentDisplayContainer = ({ sentiments, comments, setShowSentimentComments, showSentimentComments }) => {
     const [histogramData, setHistogramData] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
+    const [sentimentComments, setSentimentComments] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
+    const handleGraphClick = (binIdx, low, high) => {
+        // find sentiments in range by location
+        const commentsToFind = [];
+        const commentsFound = [];
+        sentiments.map((item, idx) => {
+            if (item < high && item > low) {
+                commentsToFind.push([idx, item]);
+            }
+        });
+        commentsToFind.map((binnedComment) => {
+            commentsFound.push([comments[binnedComment[0]], binnedComment[1]]);
+        });
+        setShowSentimentComments(true);
+        setSentimentComments(commentsFound);
+    };
     const binSentiments = (sentiments, bins) => {
         // bin from -1 to 1 in <bin> bins
         let binGenerator = d3__WEBPACK_IMPORTED_MODULE_2__.bin().domain([-1, 1]).thresholds(bins);
         let binned = binGenerator(sentiments);
-        console.log('binned', binned);
-        let histogramData = binned.map((item) => {
-            return item.length;
-        });
-        console.log('data', histogramData);
+        let histogramData = binned;
         return histogramData;
     };
     (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
@@ -52,9 +121,11 @@ const SentimentDisplayContainer = ({ sentiments }) => {
         let histogramData = binSentiments(zeroRemovedSentiment, BINS);
         setHistogramData(histogramData);
     }, [sentiments]);
-    return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Container, null,
-        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_sentiment_display__WEBPACK_IMPORTED_MODULE_1__["default"], { sentiments: histogramData }),
-        react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, "Sentiment analysis")));
+    return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null,
+        showSentimentComments && sentimentComments && react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_sentiment_comment_display__WEBPACK_IMPORTED_MODULE_3__["default"], { comments: sentimentComments, setShowSentimentComments: setShowSentimentComments }),
+        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Container, null,
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_sentiment_display__WEBPACK_IMPORTED_MODULE_1__["default"], { sentiments: histogramData, handleGraphClick: handleGraphClick }),
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, "Sentiment analysis"))));
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (SentimentDisplayContainer);
 
@@ -90,21 +161,23 @@ const Bar = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div `
     height: ${props => props.height}px;
     background: ${({ totalBins, position }) => `rgb(${(255 * position) / totalBins},0,${(255 * (totalBins - position)) / totalBins})`};
 `;
-const SentimentDisplay = ({ sentiments }) => {
+const SentimentDisplay = ({ sentiments, handleGraphClick }) => {
     const MAX_BAR_HEIGHT = 150;
     const WIDTH = 300;
-    const CreateBar = (position, value, bins) => {
-        let maxValue = Math.max(...sentiments);
-        console.log(maxValue);
-        const height = value / maxValue * MAX_BAR_HEIGHT;
-        return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Bar, { height: height, position: position, totalBins: bins, key: position, width: WIDTH / sentiments.length }));
+    const CreateBar = (position, value, bins, maxValue) => {
+        let total = value.length;
+        const height = total / maxValue * MAX_BAR_HEIGHT;
+        return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Bar, { height: height, position: position, totalBins: bins, key: position, width: WIDTH / sentiments.length, onClick: () => handleGraphClick(position, value.x0, value.x1) }));
     };
     const makeBars = () => {
         if (!sentiments)
             return;
+        const onlyTotals = sentiments.map((item) => item.length);
+        let maxValue = Math.max(...onlyTotals);
+        console.log('array of totals', onlyTotals);
         let totalBins = sentiments.length;
         const bars = sentiments.map((value, idx) => {
-            return CreateBar(idx, value, totalBins);
+            return CreateBar(idx, value, totalBins, maxValue);
         });
         return bars;
     };
@@ -317,14 +390,18 @@ const WordDisplayContainer = ({ commentData }) => {
     const [detailWord, setDetailWord] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
     const [words, setWords] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('');
     const handleBubbleClick = (word) => {
-        console.log('word clicked is', word);
+        // serach for word in comments. return first three
+        const searchResults = commentData.comments.filter((comment, idx) => {
+            return comment.toLocaleLowerCase().includes(word.toLowerCase());
+        });
+        //todo: I should just use ellipsies in the display
+        const reducedWordCountComments = searchResults.slice(0, 3).map((comment) => {
+            let shortComment = comment.slice(0, 150);
+            return shortComment += '...';
+        });
         setDetailWord({
             word: word,
-            comments: [
-                'this is one',
-                'this is another',
-                'this is a last one'
-            ]
+            comments: reducedWordCountComments
         });
     };
     const clearBubbleDetail = () => setDetailWord(null);
@@ -418,15 +495,21 @@ const Container = styled_components__WEBPACK_IMPORTED_MODULE_5__["default"].div 
     background: white;
     flex-direction: column;
     display: flex;
-    width: 400px;
+    width: 450px;
     padding: 0px;
     margin: 0px;
 `;
+const StyledText = styled_components__WEBPACK_IMPORTED_MODULE_5__["default"].div `
+    text-align: center;
+    font-size: 24px;
+    padding: 0px 18px 18px;
+`;
 const App = () => {
     const [videoId, setVideoId] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
+    const [isYouTube, setIsYouTube] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(true);
     const [commentData, setCommentData] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
+    const [showSentimentComments, setShowSentimentComments] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
     (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
-        console.log('getting url');
         const getURL = () => __awaiter(void 0, void 0, void 0, function* () {
             let videoId;
             chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
@@ -435,6 +518,9 @@ const App = () => {
                 videoId = params.get('v');
                 if (videoId) {
                     setVideoId(videoId);
+                }
+                else {
+                    setIsYouTube(false);
                 }
             });
         });
@@ -447,19 +533,16 @@ const App = () => {
         const getData = (videoId) => __awaiter(void 0, void 0, void 0, function* () {
             try {
                 if (localStorage.getItem('videoId') !== videoId) {
-                    console.log('making request');
                     const { data, status } = yield axios__WEBPACK_IMPORTED_MODULE_6__["default"].get(API_URL, {
                         params: { videoid: videoId, maxcomments: 250 },
                     });
                     setCommentData(data);
                     localStorage.setItem('videoId', videoId);
                     localStorage.setItem('data', JSON.stringify(data));
-                    console.log(data.sentiments);
                 }
                 else {
                     let data = JSON.parse(localStorage.getItem('data'));
                     setCommentData(data);
-                    console.log(data.sentiments);
                 }
             }
             catch (error) {
@@ -468,10 +551,15 @@ const App = () => {
         });
         getData(videoId);
     }, [videoId]);
+    if (!isYouTube) {
+        return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Container, null,
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_title__WEBPACK_IMPORTED_MODULE_2__["default"], { title: `Insightor: no video` }),
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement(StyledText, null, "Navigate to a youtube video then relaunch the extension to get comment insights")));
+    }
     return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Container, null,
         react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_title__WEBPACK_IMPORTED_MODULE_2__["default"], { title: `Insightor: ${videoId}` }),
-        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_word_display_word_display_container__WEBPACK_IMPORTED_MODULE_3__["default"], { commentData: commentData }),
-        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_sentiment_display_sentiment_display_container__WEBPACK_IMPORTED_MODULE_4__["default"], { sentiments: commentData === null || commentData === void 0 ? void 0 : commentData.sentiments })));
+        (!showSentimentComments) && react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_word_display_word_display_container__WEBPACK_IMPORTED_MODULE_3__["default"], { commentData: commentData }),
+        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_sentiment_display_sentiment_display_container__WEBPACK_IMPORTED_MODULE_4__["default"], { sentiments: commentData === null || commentData === void 0 ? void 0 : commentData.sentiments, comments: commentData === null || commentData === void 0 ? void 0 : commentData.comments, setShowSentimentComments: setShowSentimentComments, showSentimentComments: showSentimentComments })));
 };
 const body = document.body;
 body.style.margin = "0";

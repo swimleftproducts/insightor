@@ -58,6 +58,7 @@ const WordBubbleDetail = ({word, comments}: WordBubbleProps) => {
         e.stopPropagation()
     }
 
+    
     return (
         <Container onClick={handleClick} pos={word[1]}>
             <div>

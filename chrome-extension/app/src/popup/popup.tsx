@@ -16,17 +16,25 @@ const Container = styled.div`
     background: white;
     flex-direction: column;
     display: flex;
-    width: 400px;
+    width: 450px;
     padding: 0px;
     margin: 0px;
 `
 
+const StyledText = styled.div`
+    text-align: center;
+    font-size: 24px;
+    padding: 0px 18px 18px;
+`
+
 const App = () => {
     const [videoId, setVideoId] = useState<null|string>(null)
+    const [isYouTube, setIsYouTube] = useState(true)
     const [commentData, setCommentData] = useState<any>(null)
+    const [showSentimentComments, setShowSentimentComments] = useState(false)
+
    
     useEffect(()=>{
-        console.log('getting url')
         const getURL = async () => {
             let videoId
             chrome.tabs.query({currentWindow: true, active: true}, function (tabs){
@@ -35,6 +43,8 @@ const App = () => {
                 videoId = params.get('v')
                 if (videoId) {
                     setVideoId(videoId)
+                }else{
+                    setIsYouTube(false)
                 }
             });
         }
@@ -47,18 +57,15 @@ const App = () => {
         const getData = async (videoId) => {
             try{
                 if (localStorage.getItem('videoId') !== videoId){
-                    console.log('making request')
                     const {data, status} = await axios.get(API_URL,{
                         params: {videoid: videoId, maxcomments: 250},
                     })
                     setCommentData(data)
                     localStorage.setItem('videoId',videoId)
                     localStorage.setItem('data', JSON.stringify(data))
-                    console.log(data.sentiments)
                 } else{
                     let data = JSON.parse(localStorage.getItem('data'))
                     setCommentData(data)
-                    console.log(data.sentiments)
                 }
            }catch (error) {
                 console.log(error)
@@ -67,11 +74,26 @@ const App = () => {
         getData(videoId)
     },[videoId])
 
+    if(!isYouTube){
+        return (
+            <Container>
+            <Title title={`Insightor: no video`}/>
+            <StyledText>
+                Navigate to a youtube video then relaunch the extension to get comment insights
+            </StyledText>
+        </Container>
+        )
+    }
+
     return (
         <Container>
             <Title title={`Insightor: ${videoId}`}/>
-            <WordDisplayContainer commentData={commentData}/>
-            <SentimentDisplayContainer sentiments={commentData?.sentiments}/>
+            {(!showSentimentComments) && <WordDisplayContainer commentData={commentData}/>}
+            <SentimentDisplayContainer 
+                sentiments={commentData?.sentiments} 
+                comments={commentData?.comments} 
+                setShowSentimentComments={setShowSentimentComments} 
+                showSentimentComments={showSentimentComments}/>
         </Container>
     )
 }

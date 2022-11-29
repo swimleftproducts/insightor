@@ -3,7 +3,8 @@ import styled from 'styled-components'
 
 
 interface SentimentDisplayProps {
-    sentiments: number[],
+    sentiments: any,
+    handleGraphClick: (binIdx:number, low:number, high:number) => void,
 }
 
 const Container = styled.div`
@@ -21,24 +22,26 @@ const Bar = styled.div`
     background: ${({totalBins, position}) => `rgb(${(255*position)/totalBins},0,${(255*(totalBins-position))/totalBins})`};
 `
 
-const SentimentDisplay = ({ sentiments }: SentimentDisplayProps) => {
+const SentimentDisplay = ({ sentiments, handleGraphClick }: SentimentDisplayProps) => {
     const MAX_BAR_HEIGHT=150
     const WIDTH = 300;
 
-    const CreateBar = (position, value, bins) => {
-        let maxValue = Math.max(...sentiments)
-        console.log(maxValue)
-        const height = value / maxValue * MAX_BAR_HEIGHT
+    const CreateBar = (position, value, bins, maxValue) => {
+        let total = value.length
+        const height = total / maxValue * MAX_BAR_HEIGHT
         return (
-            <Bar height={height}  position={position} totalBins={bins} key={position} width={WIDTH/sentiments.length}/>
+            <Bar height={height}  position={position} totalBins={bins} key={position} width={WIDTH/sentiments.length} onClick={() => handleGraphClick(position, value.x0, value.x1)}/>
         )
     }
 
     const makeBars = () => {
         if(!sentiments) return
+        const onlyTotals= sentiments.map((item) => item.length)
+        let maxValue = Math.max(...onlyTotals)
+        console.log('array of totals', onlyTotals)
         let totalBins = sentiments.length
         const bars = sentiments.map((value, idx)=> {
-            return CreateBar(idx, value, totalBins)
+            return CreateBar(idx, value, totalBins, maxValue)
         })
         return bars
     }
