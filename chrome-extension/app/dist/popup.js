@@ -36,16 +36,18 @@ const Row = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div `
 const Sentiment = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div `
     font-size: 18px;
     color: darkgrey;
+    width: 60px;
 `;
 const Comment = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div `
-    margin-left: 12px;
+    margin-left: 20 px;
+    width: 320px;
 `;
 const SentimentCommentDisplay = ({ comments, setShowSentimentComments }) => {
     const renderComments = () => {
         comments = comments.slice(0, 3);
         return comments.map((comment, idx) => {
             return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Row, { key: idx, onClick: () => setShowSentimentComments(false) },
-                react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Sentiment, null, comment[1]),
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Sentiment, null, comment[1].toString().slice(0, 4)),
                 react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Comment, null, comment[0])));
         });
     };
@@ -124,8 +126,7 @@ const SentimentDisplayContainer = ({ sentiments, comments, setShowSentimentComme
     return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null,
         showSentimentComments && sentimentComments && react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_sentiment_comment_display__WEBPACK_IMPORTED_MODULE_3__["default"], { comments: sentimentComments, setShowSentimentComments: setShowSentimentComments }),
         react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Container, null,
-            react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_sentiment_display__WEBPACK_IMPORTED_MODULE_1__["default"], { sentiments: histogramData, handleGraphClick: handleGraphClick }),
-            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, "Sentiment analysis"))));
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_sentiment_display__WEBPACK_IMPORTED_MODULE_1__["default"], { sentiments: histogramData, handleGraphClick: handleGraphClick }))));
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (SentimentDisplayContainer);
 

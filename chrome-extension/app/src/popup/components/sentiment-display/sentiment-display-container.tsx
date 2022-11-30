@@ -64,9 +64,6 @@ const SentimentDisplayContainer = ({sentiments, comments, setShowSentimentCommen
             {showSentimentComments && sentimentComments && <SentimentCommentDisplay comments={sentimentComments}  setShowSentimentComments={setShowSentimentComments}/>}
             <Container>
                 <SentimentDisplay sentiments={histogramData} handleGraphClick={handleGraphClick} />
-                <div>
-                    Sentiment analysis
-                </div>
             </Container>
         </>
        

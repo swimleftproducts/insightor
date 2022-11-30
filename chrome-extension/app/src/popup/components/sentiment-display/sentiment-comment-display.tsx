@@ -25,9 +25,11 @@ const Row = styled.div`
 const Sentiment = styled.div`
     font-size: 18px;
     color: darkgrey;
+    width: 60px;
 `
 const Comment = styled.div`
-    margin-left: 12px;
+    margin-left: 20 px;
+    width: 320px;
 `
 
 const SentimentCommentDisplay = ({ comments, setShowSentimentComments }) => {
@@ -38,7 +40,7 @@ const SentimentCommentDisplay = ({ comments, setShowSentimentComments }) => {
             return(
                 <Row key={idx} onClick={()=> setShowSentimentComments(false)}>
                     <Sentiment>
-                        {comment[1]}
+                        {comment[1].toString().slice(0,4)}
                     </Sentiment>
                     <Comment>
                         {comment[0]}
