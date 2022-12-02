@@ -1,0 +1,1 @@
+console.log("in content script"),chrome.runtime.onMessage.addListener((function(e,o,n){"start"===e.message&&console.log("got it")}));
