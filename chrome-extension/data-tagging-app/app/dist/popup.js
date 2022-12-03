@@ -44,6 +44,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _comment_tagger__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./comment-tagger */ "./src/popup/components/comment-tagger/comment-tagger.tsx");
+/* harmony import */ var _services_getComments__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../services/getComments */ "./src/popup/services/getComments.ts");
+var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+
 
 
 const TAG_LIST = [
@@ -72,15 +83,15 @@ const TAG_LIST = [
         value: 'impression_neg'
     },
     {
-        label: 'General conversation positive',
+        label: 'General conv. positive',
         value: 'general_conversation_pos'
     },
     {
-        label: 'General conversation neutral',
+        label: 'General conv. neutral',
         value: 'general_conversation_neutral'
     },
     {
-        label: 'General conversation negative',
+        label: 'General conv. negative',
         value: 'general_conversation_neg'
     },
     {
@@ -113,10 +124,61 @@ const TAG_LIST = [
     }
 ];
 const CommentTaggerContainer = ({ name }) => {
+    const [videoId, setVideoId] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
+    const [commentList, setCommentList] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]);
+    const [nextPageToken, setNextPageToken] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
     const onTagClick = () => {
+        // sent labeled data to be stored in s3
     };
+    // code getting video comments
+    const uploadAndSaveComments = () => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const { items, nextPageToken: newNextPageToken } = yield (0,_services_getComments__WEBPACK_IMPORTED_MODULE_2__.getComments)(nextPageToken, videoId);
+            // save comment list
+            setCommentList(items);
+            // save nextPageToken if present
+            setNextPageToken(newNextPageToken);
+            console.log(newNextPageToken);
+        }
+        catch (err) {
+            console.log(err);
+        }
+    });
+    /* item: {
+        item1: {
+            item2
+        }
+    }
+    
+    var 1 = map
+    var 2 = var1.map
+    */
+    (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+        if (videoId) {
+            uploadAndSaveComments();
+        }
+    }, [videoId]);
+    (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+        const getURL = () => __awaiter(void 0, void 0, void 0, function* () {
+            let videoId;
+            chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+                const url = new URL(tabs[0].url);
+                const params = new URLSearchParams(url.search);
+                videoId = params.get('v');
+                if (videoId) {
+                    setVideoId(videoId);
+                }
+            });
+        });
+        getURL();
+    }, []);
+    (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+        if (!commentList) {
+            //get more comments
+        }
+    }, [commentList]);
     return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null,
-        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_comment_tagger__WEBPACK_IMPORTED_MODULE_1__["default"], { categories: TAG_LIST, onTagClick: onTagClick })));
+        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_comment_tagger__WEBPACK_IMPORTED_MODULE_1__["default"], { comment: commentList.pop(), categories: TAG_LIST, onTagClick: onTagClick })));
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (CommentTaggerContainer);
 
@@ -168,19 +230,19 @@ const PillContainer = styled_components__WEBPACK_IMPORTED_MODULE_3__["default"].
     width: 300px;
     border: 1px solid black;
 `;
-const CommentTagger = ({ categories, onTagClick }) => {
+const CommentTagger = ({ categories, onTagClick, comment }) => {
     const handlePillClick = (e, value) => {
         console.log(e);
         console.log(value);
     };
     const renderPills = () => {
         return categories.map((category, idx) => {
-            console.log(category);
             return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_pill_button__WEBPACK_IMPORTED_MODULE_2__["default"], { key: idx, color: category === null || category === void 0 ? void 0 : category.color, text: category.label, onClick: (e) => handlePillClick(e, category.value) }));
         });
     };
+    console.log(comment);
     return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Container, null,
-        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_comment_box__WEBPACK_IMPORTED_MODULE_1__["default"], { comment: 'this is an example comment' }),
+        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_comment_box__WEBPACK_IMPORTED_MODULE_1__["default"], { comment: comment === null || comment === void 0 ? void 0 : comment.snippet.topLevelComment.snippet.textOriginal }),
         react__WEBPACK_IMPORTED_MODULE_0___default().createElement(PillContainer, null, renderPills())));
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (CommentTagger);
@@ -207,8 +269,8 @@ const StyledButton = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].d
     width: 85px;
     height: 32px;
     border-radius: 16px;
-    font-size: 8px;
-    line-height: 8px;
+    font-size: 10px;
+    line-height: 10px;
     margin: 2px 3px;
     text-align: center;
     background: lightgrey;
@@ -452,6 +514,40 @@ const getAuth = async (userPin) => {
     }catch (error) {
         throw new Error(error)
     }
+}
+
+
+
+
+/***/ }),
+
+/***/ "./src/popup/services/getComments.ts":
+/*!*******************************************!*\
+  !*** ./src/popup/services/getComments.ts ***!
+  \*******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "getComments": () => (/* binding */ getComments)
+/* harmony export */ });
+const axios = __webpack_require__(/*! axios */ "./node_modules/axios/dist/browser/axios.cjs")
+
+const API_URL = `https://www.googleapis.com/youtube/v3/commentThreads`
+
+const getComments = async (nextPageToken, videoId) => {      
+    console.log('api key', "AIzaSyB8kyLq0dG94QpudqfDeNlIppFuNF4RkmA")
+    const {data, status} = await axios.get(API_URL,{
+        params: {
+            nextPageToken,
+            key: "AIzaSyB8kyLq0dG94QpudqfDeNlIppFuNF4RkmA",
+            videoId,
+            part: 'snippet',
+            textFormat: 'plaintext'
+        }
+    })
+    console.log(data)
+    return data
 }
 
 

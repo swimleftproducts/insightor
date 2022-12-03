@@ -32,11 +32,20 @@ const PillContainer = styled.div`
 `
 
 interface CommentTaggerProps {
+    comment: {
+        snippet:{
+            topLevelComment:{
+                snippet:{
+                    textOriginal: string
+                }
+            }
+        }
+    },
     categories: any,
     onTagClick: (value: string) => void
 }
 
-const CommentTagger = ({categories, onTagClick}: CommentTaggerProps) => {
+const CommentTagger = ({categories, onTagClick, comment}: CommentTaggerProps) => {
 
 
     const handlePillClick = (e:any, value) =>{
@@ -46,17 +55,16 @@ const CommentTagger = ({categories, onTagClick}: CommentTaggerProps) => {
     
     const renderPills = () => {
         return categories.map((category, idx)=>{
-            console.log(category)
             return (
                 <PillButton key={idx} color={category?.color} text={category.label} onClick={(e)=> handlePillClick(e, category.value)}/>
             )
         })
 
     }
-
+    console.log(comment)
     return (
         <Container>
-            <CommentBox comment='this is an example comment'/>
+            <CommentBox comment={comment?.snippet.topLevelComment.snippet.textOriginal}/>
             <PillContainer>
                {renderPills()} 
             </PillContainer>

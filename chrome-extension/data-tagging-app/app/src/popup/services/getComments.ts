@@ -1,19 +1,22 @@
 const axios = require('axios')
 
-const API_URL = 'https://i4ns42rneavinn3qsclc3i6y340icbtd.lambda-url.us-east-1.on.aws/'
+const API_URL = `https://www.googleapis.com/youtube/v3/commentThreads`
 
-
-const getAuth = async (userPin) => {
-   try{         
-        const {data, status} = await axios.get(API_URL,{
-            params: {user_pin: userPin}
-        })
-        return data
-    }catch (error) {
-        throw new Error(error)
-    }
+const getComments = async (nextPageToken, videoId) => {      
+    console.log('api key', process.env.YOU_TUBE_API)
+    const {data, status} = await axios.get(API_URL,{
+        params: {
+            nextPageToken,
+            key: process.env.YOU_TUBE_API,
+            videoId,
+            part: 'snippet',
+            textFormat: 'plaintext'
+        }
+    })
+    console.log(data)
+    return data
 }
 
 export {
-    getAuth
+    getComments
 }

@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import CommentTagger from './comment-tagger'
+import { getComments } from '../../services/getComments'
 
 const TAG_LIST =[
     {
@@ -28,15 +29,15 @@ const TAG_LIST =[
         value: 'impression_neg'
     },
     {
-        label: 'General conversation positive',
+        label: 'General conv. positive',
         value: 'general_conversation_pos'
     },
     {
-        label: 'General conversation neutral',
+        label: 'General conv. neutral',
         value: 'general_conversation_neutral'
     },
     {
-        label: 'General conversation negative',
+        label: 'General conv. negative',
         value: 'general_conversation_neg'
     },
     {
@@ -75,13 +76,66 @@ interface CommentTaggerContainerProps {
     name: string
 }
 const CommentTaggerContainer = ({name}: CommentTaggerContainerProps) => {
+    const [videoId, setVideoId] = useState< null | string>(null)
+    const [commentList, setCommentList] = useState<any[] | null>([])
+    const [nextPageToken, setNextPageToken] = useState<string | null | undefined>(null)
 
     const onTagClick = () => {
-
+        // sent labeled data to be stored in s3
     }
+
+    // code getting video comments
+    const uploadAndSaveComments = async () => {
+        try {
+            const {items, nextPageToken:newNextPageToken} = await getComments(nextPageToken, videoId)
+            // save comment list
+            setCommentList(items)
+            // save nextPageToken if present
+            setNextPageToken(newNextPageToken)
+            console.log(newNextPageToken)
+        } catch(err){
+            console.log(err)
+        } 
+    }
+/* item: {
+    item1: {
+        item2
+    }
+}
+
+var 1 = map
+var 2 = var1.map
+*/
+    useEffect(()=>{
+        if( videoId ){
+            uploadAndSaveComments()  
+        }
+    },[videoId])
+
+    useEffect(()=>{
+        const getURL = async () => {
+            let videoId
+            chrome.tabs.query({currentWindow: true, active: true}, function (tabs){
+                const url = new URL(tabs[0].url);
+                const params = new URLSearchParams(url.search)
+                videoId = params.get('v')
+                if (videoId) {
+                    setVideoId(videoId)
+                }
+            });
+        }
+        getURL()
+    },[])
+
+    useEffect(()=>{
+        if(!commentList){
+            //get more comments
+        }
+    },[commentList])
+
     return (
         <div>
-            <CommentTagger categories={TAG_LIST} onTagClick={onTagClick}/>
+            <CommentTagger comment={commentList.pop()} categories={TAG_LIST} onTagClick={onTagClick}/>
         </div>
     )
 }

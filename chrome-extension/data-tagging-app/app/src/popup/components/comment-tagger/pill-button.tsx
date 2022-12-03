@@ -11,8 +11,8 @@ const StyledButton = styled.div`
     width: 85px;
     height: 32px;
     border-radius: 16px;
-    font-size: 8px;
-    line-height: 8px;
+    font-size: 10px;
+    line-height: 10px;
     margin: 2px 3px;
     text-align: center;
     background: lightgrey;
