@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import {createRoot} from 'react-dom/client'
-import Title from './components/title'
-import WordDisplayContainer from './components/word-display/word-display-container'
-import getAnalysis from './services/analysis'
-import axios from 'axios'
-import SentimentDisplayContainer from './components/sentiment-display/sentiment-display-container'
+import PinInput from './components/pin-input'
+import CommentTaggerContainer from './components/comment-tagger/comment-tagger-container'
+
 
 const Container = styled.div`
     html {
@@ -16,7 +14,7 @@ const Container = styled.div`
     background: white;
     flex-direction: column;
     display: flex;
-    width: 450px;
+    width: 575px;
     padding: 0px;
     margin: 0px;
 `
@@ -28,72 +26,19 @@ const StyledText = styled.div`
 `
 
 const App = () => {
-    const [videoId, setVideoId] = useState<null|string>(null)
-    const [isYouTube, setIsYouTube] = useState(true)
-    const [commentData, setCommentData] = useState<any>(null)
-    const [showSentimentComments, setShowSentimentComments] = useState(false)
+    const [showAuth, setShowAuth] = useState(true)
+    const [name, setName] = useState<string | null>(null)
 
-   
-    useEffect(()=>{
-        const getURL = async () => {
-            let videoId
-            chrome.tabs.query({currentWindow: true, active: true}, function (tabs){
-                const url = new URL(tabs[0].url);
-                const params = new URLSearchParams(url.search)
-                videoId = params.get('v')
-                if (videoId) {
-                    setVideoId(videoId)
-                }else{
-                    setIsYouTube(false)
-                }
-            });
-        }
-        getURL()
-    },[])
-    const API_URL = 'https://sbk957ltol.execute-api.us-east-1.amazonaws.com/test/getanalysis'
-    
-    useEffect(()=> {
-        if (!videoId) return
-        const getData = async (videoId) => {
-            try{
-                if (localStorage.getItem('videoId') !== videoId){
-                    const {data, status} = await axios.get(API_URL,{
-                        params: {videoid: videoId, maxcomments: 250},
-                    })
-                    setCommentData(data)
-                    localStorage.setItem('videoId',videoId)
-                    localStorage.setItem('data', JSON.stringify(data))
-                } else{
-                    let data = JSON.parse(localStorage.getItem('data'))
-                    setCommentData(data)
-                }
-           }catch (error) {
-                console.log(error)
-           }
-        }
-        getData(videoId)
-    },[videoId])
-
-    if(!isYouTube){
-        return (
-            <Container>
-            <Title title={`Insightor: no video`}/>
-            <StyledText>
-                Navigate to a youtube video then relaunch the extension to get comment insights
-            </StyledText>
-        </Container>
-        )
+    const handleSuccessAuth = (name:string) => {
+        setShowAuth(false)
+        setName(name)
     }
+
 
     return (
         <Container>
-            <Title title={`Insightor: ${videoId}`}/>
-            {(!showSentimentComments) && <WordDisplayContainer commentData={commentData}/>}
-            <SentimentDisplayContainer 
-                sentiments={commentData?.sentiments} 
-                comments={commentData?.comments} 
-                setShowSentimentComments={setShowSentimentComments} 
-                showSentimentComments={showSentimentComments}/>
+            {showAuth && (<PinInput handleSuccessAuth={handleSuccessAuth}/>)}
+            {name && <CommentTaggerContainer name={name} />}
         </Container>
     )
 }

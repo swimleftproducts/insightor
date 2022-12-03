@@ -1,4 +1,5 @@
-# Chrome extension for insightor
+# Chrome extension for data labeling
+This extension allows for the easy labeling of youtube comment data
 
 # Develpment
 Run in watch mode
@@ -11,5 +12,5 @@ Build to /dist
 
 Zip for upload to chrome store
 - cd /dist
-- zip -r ../insightor.zip .
+- zip -r ../insightor-data-log.zip .
 

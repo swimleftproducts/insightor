@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "insightor",
+    "name": "insightor-data-label",
     "version": "1.0.0",
     "icons":{
         "16": "icon-32x32.png",
@@ -9,7 +9,7 @@
     },
     "options_page": "options.html",
     "action": {
-        "default_title": "Insightor",
+        "default_title": "Insightor-data-label",
         "default_popup": "popup.html"
     },
     "background": {
