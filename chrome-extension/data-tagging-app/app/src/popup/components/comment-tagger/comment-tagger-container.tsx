@@ -2,114 +2,94 @@ import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import CommentTagger from './comment-tagger'
 import { getComments } from '../../services/getComments'
-
-const TAG_LIST =[
-    {
-        label: 'Information',
-        value: 'information'
-    },
-    {
-        label: 'Advice give or ask',
-        value: 'advice'
-    },
-    {
-        label: 'Video content description',
-        value: 'video_content_description'
-    },
-    {
-        label: 'Impression positive',
-        value: 'impression_pos'
-    },
-    {
-        label: 'Impression neutral',
-        value: 'impression_neutral'
-    },
-    {
-        label: 'Impression negative',
-        value: 'impression_neg'
-    },
-    {
-        label: 'General conv. positive',
-        value: 'general_conversation_pos'
-    },
-    {
-        label: 'General conv. neutral',
-        value: 'general_conversation_neutral'
-    },
-    {
-        label: 'General conv. negative',
-        value: 'general_conversation_neg'
-    },
-    {
-        label: 'Opinion positive',
-        value: 'opinion_pos'
-    },
-    {
-        label: 'Opinion neutral',
-        value: 'opinion_neutral'
-    },
-    {
-        label: 'Opinion negative',
-        value: 'opinion_neg'
-    },
-    {
-        label: 'Personal feelings positive',
-        value: 'personal_feelings_pos'
-    },
-    {
-        label: 'Personal feelings neutral',
-        value: 'personal_feelings_neutral'
-    },
-    {
-        label: 'Personal feelings negative',
-        value: 'personal_feelings_neg'
-    },
-     {
-        label: 'Spam',
-        value: 'spam'
-    }
-    
-]
-
+import { getVideoDetail } from '../../services/getVideoMetaData'
+import {uploadTaggedComment} from '../../services/uploadTaggedComment'
+import {TAG_LIST, NON_VARIABLE_TAG_LIST} from '../../utils/tag-list'
 
 interface CommentTaggerContainerProps {
     name: string
 }
+interface s3UploadInterface {
+    "video_id":string,
+    "video_title":string,
+    "comment_id":string,
+    "like_count": number,
+    "total_reply_count":number,
+    "comment":string,
+    "label_primary": string,
+    "label_secondary": string,
+    "tagger":string
+}
+
 const CommentTaggerContainer = ({name}: CommentTaggerContainerProps) => {
     const [videoId, setVideoId] = useState< null | string>(null)
+    const [videoMetaData, setVideoMetaData] = useState<any|null>(null)
     const [commentList, setCommentList] = useState<any[] | null>([])
     const [nextPageToken, setNextPageToken] = useState<string | null | undefined>(null)
 
-    const onTagClick = () => {
+
+    // {video_title, comment_id, like_count, total_reply_count, comment, label_primary, label_secondary}
+    const onTagClick = async ( taggedCommentData) => {
         // sent labeled data to be stored in s3
+        const s3UploadData = {
+        "video_id": videoId,
+        "video_title": videoMetaData.items[0].snippet.title,
+        "video_category": videoMetaData.items[0].snippet.categoryId,
+        "video_description": videoMetaData.items[0].snippet.description,
+        "tagger":name,
+        ...taggedCommentData
+        }
+        try{
+            await uploadTaggedComment(s3UploadData)
+        } catch (err){
+            console.log('upload failed')
+            return
+        }
+        const [,...newCommentList] = commentList
+        //remove first element from comment list
+        setCommentList(newCommentList)
+        //update cache
+        localStorage.setItem('tagging_comment_list', JSON.stringify(newCommentList))
     }
 
-    // code getting video comments
     const uploadAndSaveComments = async () => {
         try {
             const {items, nextPageToken:newNextPageToken} = await getComments(nextPageToken, videoId)
-            // save comment list
+            console.log(items)
             setCommentList(items)
-            // save nextPageToken if present
             setNextPageToken(newNextPageToken)
-            console.log(newNextPageToken)
+            localStorage.setItem('tagging_videoId',videoId)
+            localStorage.setItem('tagging_comment_list', JSON.stringify(items))
+            localStorage.setItem('tagging_nextPageToken', newNextPageToken)
+
         } catch(err){
             console.log(err)
         } 
     }
-/* item: {
-    item1: {
-        item2
+    const getVideoMetaData = async () => {
+        try {
+            const data = await getVideoDetail(videoId)
+            setVideoMetaData(data)
+        } catch(err){
+            console.log(err)
+        } 
     }
-}
 
-var 1 = map
-var 2 = var1.map
-*/
-    useEffect(()=>{
-        if( videoId ){
-            uploadAndSaveComments()  
+    const checkAndUseCache = () => {
+        const cacheVideoId = localStorage.getItem('tagging_videoId')
+        if  (cacheVideoId === videoId){
+            setCommentList(JSON.parse(localStorage.getItem('tagging_comment_list')))
+            setNextPageToken(localStorage.getItem('tagging_nextPageToken'))
+            return true
         }
+        return false
+    }
+
+    useEffect(()=>{
+        if(!videoId) return
+        getVideoMetaData()
+        if(checkAndUseCache()) return
+        uploadAndSaveComments()  
     },[videoId])
 
     useEffect(()=>{
@@ -128,14 +108,19 @@ var 2 = var1.map
     },[])
 
     useEffect(()=>{
-        if(!commentList){
+        if(!commentList.length && videoId){
             //get more comments
+            uploadAndSaveComments()
         }
     },[commentList])
 
     return (
         <div>
-            <CommentTagger comment={commentList.pop()} categories={TAG_LIST} onTagClick={onTagClick}/>
+            <CommentTagger 
+                comment={(commentList.length ? commentList[0]: null)} 
+                categories={TAG_LIST} 
+                categoriesNonVariable={NON_VARIABLE_TAG_LIST}
+                onTagClick={onTagClick}/>
         </div>
     )
 }

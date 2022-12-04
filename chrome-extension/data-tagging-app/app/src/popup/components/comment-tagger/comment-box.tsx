@@ -2,10 +2,12 @@ import React from 'react'
 import styled from 'styled-components'
 
 const ContentBox = styled.div`
-    width: 225px;
-    background: grey;
-    height: 95%;
+    width: 400px;
+    background: lightgrey;
+    height: 100px;
     padding:  15px;
+    font-size: 16px;
+    overflow-y: scroll;
 `
 interface CommentBoxProps {
     comment: string,

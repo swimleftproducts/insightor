@@ -18,10 +18,12 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const ContentBox = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div `
-    width: 225px;
-    background: grey;
-    height: 95%;
+    width: 400px;
+    background: lightgrey;
+    height: 100px;
     padding:  15px;
+    font-size: 16px;
+    overflow-y: scroll;
 `;
 const CommentBox = ({ comment }) => {
     return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(ContentBox, null, comment));
@@ -45,6 +47,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _comment_tagger__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./comment-tagger */ "./src/popup/components/comment-tagger/comment-tagger.tsx");
 /* harmony import */ var _services_getComments__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../services/getComments */ "./src/popup/services/getComments.ts");
+/* harmony import */ var _services_getVideoMetaData__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../services/getVideoMetaData */ "./src/popup/services/getVideoMetaData.ts");
+/* harmony import */ var _services_uploadTaggedComment__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../services/uploadTaggedComment */ "./src/popup/services/uploadTaggedComment.ts");
+/* harmony import */ var _utils_tag_list__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../utils/tag-list */ "./src/popup/utils/tag-list.ts");
 var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -57,106 +62,70 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 
 
 
-const TAG_LIST = [
-    {
-        label: 'Information',
-        value: 'information'
-    },
-    {
-        label: 'Advice give or ask',
-        value: 'advice'
-    },
-    {
-        label: 'Video content description',
-        value: 'video_content_description'
-    },
-    {
-        label: 'Impression positive',
-        value: 'impression_pos'
-    },
-    {
-        label: 'Impression neutral',
-        value: 'impression_neutral'
-    },
-    {
-        label: 'Impression negative',
-        value: 'impression_neg'
-    },
-    {
-        label: 'General conv. positive',
-        value: 'general_conversation_pos'
-    },
-    {
-        label: 'General conv. neutral',
-        value: 'general_conversation_neutral'
-    },
-    {
-        label: 'General conv. negative',
-        value: 'general_conversation_neg'
-    },
-    {
-        label: 'Opinion positive',
-        value: 'opinion_pos'
-    },
-    {
-        label: 'Opinion neutral',
-        value: 'opinion_neutral'
-    },
-    {
-        label: 'Opinion negative',
-        value: 'opinion_neg'
-    },
-    {
-        label: 'Personal feelings positive',
-        value: 'personal_feelings_pos'
-    },
-    {
-        label: 'Personal feelings neutral',
-        value: 'personal_feelings_neutral'
-    },
-    {
-        label: 'Personal feelings negative',
-        value: 'personal_feelings_neg'
-    },
-    {
-        label: 'Spam',
-        value: 'spam'
-    }
-];
+
+
+
 const CommentTaggerContainer = ({ name }) => {
     const [videoId, setVideoId] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
+    const [videoMetaData, setVideoMetaData] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
     const [commentList, setCommentList] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]);
     const [nextPageToken, setNextPageToken] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
-    const onTagClick = () => {
+    // {video_title, comment_id, like_count, total_reply_count, comment, label_primary, label_secondary}
+    const onTagClick = (taggedCommentData) => __awaiter(void 0, void 0, void 0, function* () {
         // sent labeled data to be stored in s3
-    };
-    // code getting video comments
+        const s3UploadData = Object.assign({ "video_id": videoId, "video_title": videoMetaData.items[0].snippet.title, "video_category": videoMetaData.items[0].snippet.categoryId, "video_description": videoMetaData.items[0].snippet.description, "tagger": name }, taggedCommentData);
+        try {
+            yield (0,_services_uploadTaggedComment__WEBPACK_IMPORTED_MODULE_4__.uploadTaggedComment)(s3UploadData);
+        }
+        catch (err) {
+            console.log('upload failed');
+            return;
+        }
+        const [, ...newCommentList] = commentList;
+        //remove first element from comment list
+        setCommentList(newCommentList);
+        //update cache
+        localStorage.setItem('tagging_comment_list', JSON.stringify(newCommentList));
+    });
     const uploadAndSaveComments = () => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const { items, nextPageToken: newNextPageToken } = yield (0,_services_getComments__WEBPACK_IMPORTED_MODULE_2__.getComments)(nextPageToken, videoId);
-            // save comment list
+            console.log(items);
             setCommentList(items);
-            // save nextPageToken if present
             setNextPageToken(newNextPageToken);
-            console.log(newNextPageToken);
+            localStorage.setItem('tagging_videoId', videoId);
+            localStorage.setItem('tagging_comment_list', JSON.stringify(items));
+            localStorage.setItem('tagging_nextPageToken', newNextPageToken);
         }
         catch (err) {
             console.log(err);
         }
     });
-    /* item: {
-        item1: {
-            item2
+    const getVideoMetaData = () => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const data = yield (0,_services_getVideoMetaData__WEBPACK_IMPORTED_MODULE_3__.getVideoDetail)(videoId);
+            setVideoMetaData(data);
         }
-    }
-    
-    var 1 = map
-    var 2 = var1.map
-    */
+        catch (err) {
+            console.log(err);
+        }
+    });
+    const checkAndUseCache = () => {
+        const cacheVideoId = localStorage.getItem('tagging_videoId');
+        if (cacheVideoId === videoId) {
+            setCommentList(JSON.parse(localStorage.getItem('tagging_comment_list')));
+            setNextPageToken(localStorage.getItem('tagging_nextPageToken'));
+            return true;
+        }
+        return false;
+    };
     (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
-        if (videoId) {
-            uploadAndSaveComments();
-        }
+        if (!videoId)
+            return;
+        getVideoMetaData();
+        if (checkAndUseCache())
+            return;
+        uploadAndSaveComments();
     }, [videoId]);
     (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
         const getURL = () => __awaiter(void 0, void 0, void 0, function* () {
@@ -173,12 +142,13 @@ const CommentTaggerContainer = ({ name }) => {
         getURL();
     }, []);
     (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
-        if (!commentList) {
+        if (!commentList.length && videoId) {
             //get more comments
+            uploadAndSaveComments();
         }
     }, [commentList]);
     return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null,
-        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_comment_tagger__WEBPACK_IMPORTED_MODULE_1__["default"], { comment: commentList.pop(), categories: TAG_LIST, onTagClick: onTagClick })));
+        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_comment_tagger__WEBPACK_IMPORTED_MODULE_1__["default"], { comment: (commentList.length ? commentList[0] : null), categories: _utils_tag_list__WEBPACK_IMPORTED_MODULE_5__.TAG_LIST, categoriesNonVariable: _utils_tag_list__WEBPACK_IMPORTED_MODULE_5__.NON_VARIABLE_TAG_LIST, onTagClick: onTagClick })));
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (CommentTaggerContainer);
 
@@ -212,11 +182,12 @@ const Container = styled_components__WEBPACK_IMPORTED_MODULE_3__["default"].div 
     justify-content: start;
     display: flex;
     padding: 0px;
-    margin: 15px;
+    margin: 5px 0 5px 15px;
     height: 180px;
-    width: 100%;
+    width: 98%;
 `;
 const PillContainer = styled_components__WEBPACK_IMPORTED_MODULE_3__["default"].div `
+    cursor:pointer;
     color: black;
     background: white;
     flex-direction: row;
@@ -226,24 +197,88 @@ const PillContainer = styled_components__WEBPACK_IMPORTED_MODULE_3__["default"].
     display: flex;
     padding: 0px;
     margin: 5px;
-    height: 200px;
-    width: 300px;
-    border: 1px solid black;
+    height: 180px;
+    width: 280px;
 `;
-const CommentTagger = ({ categories, onTagClick, comment }) => {
-    const handlePillClick = (e, value) => {
-        console.log(e);
-        console.log(value);
+const Flex = styled_components__WEBPACK_IMPORTED_MODULE_3__["default"].div `
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 95%;
+`;
+const NonVariablePillContainer = styled_components__WEBPACK_IMPORTED_MODULE_3__["default"].div `
+    cursor:pointer;
+    color: black;
+    background: white;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    padding: 0px;
+    margin: 0;
+    height: 75x;
+    width: 100%;   
+`;
+const TitleContainer = styled_components__WEBPACK_IMPORTED_MODULE_3__["default"].div `
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 90%;
+`;
+const CategoryTitle = styled_components__WEBPACK_IMPORTED_MODULE_3__["default"].div `
+    width: 100%;
+    text-align: center;
+`;
+const CommentTagger = ({ categories, categoriesNonVariable, onTagClick, comment }) => {
+    const [primaryTag, setPrimaryTag] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('');
+    const s3UploadData = {
+        comment_id: comment === null || comment === void 0 ? void 0 : comment.id,
+        like_count: comment === null || comment === void 0 ? void 0 : comment.snippet.topLevelComment.snippet.likeCount,
+        total_reply_count: comment === null || comment === void 0 ? void 0 : comment.snippet.totalReplyCount,
+        comment: comment === null || comment === void 0 ? void 0 : comment.snippet.topLevelComment.snippet.textDisplay,
     };
-    const renderPills = () => {
+    const handlePillClick = (e, value) => {
+        //if ctrl was held story the value of click
+        if (value === primaryTag) {
+            setPrimaryTag('');
+            return;
+        }
+        if (e.ctrlKey && !primaryTag) {
+            setPrimaryTag(value);
+        }
+        else {
+            if (primaryTag) {
+                onTagClick(Object.assign({ label_primary: primaryTag, label_secondary: value }, s3UploadData));
+                setPrimaryTag('');
+            }
+            else {
+                onTagClick(Object.assign({ label_primary: value, label_secondary: null }, s3UploadData));
+                setPrimaryTag('');
+            }
+        }
+    };
+    const renderVariablePills = () => {
         return categories.map((category, idx) => {
-            return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_pill_button__WEBPACK_IMPORTED_MODULE_2__["default"], { key: idx, color: category === null || category === void 0 ? void 0 : category.color, text: category.label, onClick: (e) => handlePillClick(e, category.value) }));
+            return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_pill_button__WEBPACK_IMPORTED_MODULE_2__["default"], { wide: true, active: primaryTag === category.value, key: idx, color: category === null || category === void 0 ? void 0 : category.color, text: category.label, onClick: (e) => handlePillClick(e, category.value) }));
         });
     };
-    console.log(comment);
+    const renderNonVariablePills = () => {
+        return categoriesNonVariable.map((category, idx) => {
+            return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_pill_button__WEBPACK_IMPORTED_MODULE_2__["default"], { active: primaryTag === category.value, key: idx, color: category === null || category === void 0 ? void 0 : category.color, text: category.label, onClick: (e) => handlePillClick(e, category.value) }));
+        });
+    };
     return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Container, null,
-        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_comment_box__WEBPACK_IMPORTED_MODULE_1__["default"], { comment: comment === null || comment === void 0 ? void 0 : comment.snippet.topLevelComment.snippet.textOriginal }),
-        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(PillContainer, null, renderPills())));
+        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Flex, null,
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_comment_box__WEBPACK_IMPORTED_MODULE_1__["default"], { comment: comment === null || comment === void 0 ? void 0 : comment.snippet.topLevelComment.snippet.textOriginal }),
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement(NonVariablePillContainer, null, renderNonVariablePills())),
+        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Flex, null,
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement(TitleContainer, null,
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement(CategoryTitle, null, "Positive"),
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement(CategoryTitle, null, "Neutral"),
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement(CategoryTitle, null, "Negative")),
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement(PillContainer, null, renderVariablePills()))));
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (CommentTagger);
 
@@ -266,13 +301,16 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const StyledButton = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div `
-    width: 85px;
+    width: ${props => props.wide ? '85' : '100'}px;
     height: 32px;
     border-radius: 16px;
     font-size: 10px;
     line-height: 10px;
-    margin: 2px 3px;
+    margin: 3px 3px;
     text-align: center;
+    ${props => props.active && styled_components__WEBPACK_IMPORTED_MODULE_1__.css `
+      border: 2px solid black;
+    `}
     background: lightgrey;
     background: ${props => props.color && props.color};
     &:hover {
@@ -285,8 +323,8 @@ const Container = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div 
     align-items: center;
     height: 100%
 `;
-const PillButton = ({ text, onClick, color }) => {
-    return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(StyledButton, { onClick: onClick },
+const PillButton = ({ text, wide, onClick, color, active }) => {
+    return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(StyledButton, { wide: wide, active: active, onClick: onClick },
         react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Container, null,
             react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, text))));
 };
@@ -460,7 +498,7 @@ const Container = styled_components__WEBPACK_IMPORTED_MODULE_4__["default"].div 
     background: white;
     flex-direction: column;
     display: flex;
-    width: 575px;
+    width: 750px;
     padding: 0px;
     margin: 0px;
 `;
@@ -535,21 +573,160 @@ const axios = __webpack_require__(/*! axios */ "./node_modules/axios/dist/browse
 
 const API_URL = `https://www.googleapis.com/youtube/v3/commentThreads`
 
-const getComments = async (nextPageToken, videoId) => {      
-    console.log('api key', "AIzaSyB8kyLq0dG94QpudqfDeNlIppFuNF4RkmA")
+const getComments = async (nextPageToken, videoId) => {    
     const {data, status} = await axios.get(API_URL,{
         params: {
-            nextPageToken,
+            pageToken: nextPageToken,
             key: "AIzaSyB8kyLq0dG94QpudqfDeNlIppFuNF4RkmA",
             videoId,
             part: 'snippet',
             textFormat: 'plaintext'
         }
     })
-    console.log(data)
     return data
 }
 
+
+
+
+/***/ }),
+
+/***/ "./src/popup/services/getVideoMetaData.ts":
+/*!************************************************!*\
+  !*** ./src/popup/services/getVideoMetaData.ts ***!
+  \************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "getVideoDetail": () => (/* binding */ getVideoDetail)
+/* harmony export */ });
+const axios = __webpack_require__(/*! axios */ "./node_modules/axios/dist/browser/axios.cjs")
+
+const API_URL = `https://www.googleapis.com/youtube/v3/videos`
+
+const getVideoDetail = async (videoId) => {      
+    const {data, status} = await axios.get(API_URL,{
+        params: {
+            key: "AIzaSyB8kyLq0dG94QpudqfDeNlIppFuNF4RkmA",
+            id:videoId,
+            part: 'snippet',
+        }
+    })
+    return data
+}
+
+
+
+
+/***/ }),
+
+/***/ "./src/popup/services/uploadTaggedComment.ts":
+/*!***************************************************!*\
+  !*** ./src/popup/services/uploadTaggedComment.ts ***!
+  \***************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "uploadTaggedComment": () => (/* binding */ uploadTaggedComment)
+/* harmony export */ });
+const axios = __webpack_require__(/*! axios */ "./node_modules/axios/dist/browser/axios.cjs")
+
+const API_URL = `https://sbk957ltol.execute-api.us-east-1.amazonaws.com/test/upload-tagged`
+
+const uploadTaggedComment = async (taggedComment) => {      
+    const {data, status} = await axios.post(API_URL,{
+        ...taggedComment
+    })
+    return data
+}
+
+
+
+
+/***/ }),
+
+/***/ "./src/popup/utils/tag-list.ts":
+/*!*************************************!*\
+  !*** ./src/popup/utils/tag-list.ts ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "NON_VARIABLE_TAG_LIST": () => (/* binding */ NON_VARIABLE_TAG_LIST),
+/* harmony export */   "TAG_LIST": () => (/* binding */ TAG_LIST)
+/* harmony export */ });
+const NON_VARIABLE_TAG_LIST = [
+    {
+        label: 'Information',
+        value: 'information'
+    },
+    {
+        label: 'Advice give or ask',
+        value: 'advice'
+    },
+    {
+        label: 'Video content description',
+        value: 'video_content_description'
+    },
+    {
+        label: 'Spam',
+        value: 'spam'
+    }
+]
+
+const TAG_LIST =[
+    {
+        label: 'Impression positive',
+        value: 'impression_pos'
+    },
+    {
+        label: 'Impression neutral',
+        value: 'impression_neutral'
+    },
+    {
+        label: 'Impression negative',
+        value: 'impression_neg'
+    },
+    {
+        label: 'General conv. positive',
+        value: 'general_conversation_pos'
+    },
+    {
+        label: 'General conv. neutral',
+        value: 'general_conversation_neutral'
+    },
+    {
+        label: 'General conv. negative',
+        value: 'general_conversation_neg'
+    },
+    {
+        label: 'Opinion positive',
+        value: 'opinion_pos'
+    },
+    {
+        label: 'Opinion neutral',
+        value: 'opinion_neutral'
+    },
+    {
+        label: 'Opinion negative',
+        value: 'opinion_neg'
+    },
+    {
+        label: 'Personal feelings positive',
+        value: 'personal_feelings_pos'
+    },
+    {
+        label: 'Personal feelings neutral',
+        value: 'personal_feelings_neutral'
+    },
+    {
+        label: 'Personal feelings negative',
+        value: 'personal_feelings_neg'
+    },
+]
 
 
 
