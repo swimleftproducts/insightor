@@ -470,7 +470,7 @@ const Container = styled_components__WEBPACK_IMPORTED_MODULE_3__["default"].div 
     align-items: center;
     flex-flow: row wrap;
     gap: 8px;
-    height: 190px;
+    height: 198px;
     overflow: hidden;
 `;
 const Title = styled_components__WEBPACK_IMPORTED_MODULE_3__["default"].div `
@@ -488,7 +488,7 @@ const WordDisplay = ({ words, detailWord, handleBubbleClick, onClick }) => {
         return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_word_bubble_word_bubble_detail__WEBPACK_IMPORTED_MODULE_2__["default"], { key: idx, word: word, comments: detailWord === null || detailWord === void 0 ? void 0 : detailWord.comments }));
     });
     return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null,
-        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Title, null, "Title"),
+        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Title, null, "Common words"),
         react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Container, { onClick: onClick }, bubbles)));
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (WordDisplay);

@@ -20,7 +20,7 @@ const Container = styled.div`
     align-items: center;
     flex-flow: row wrap;
     gap: 8px;
-    height: 190px;
+    height: 198px;
     overflow: hidden;
 `
 const Title = styled.div`
@@ -45,7 +45,7 @@ const WordDisplay = ({words, detailWord, handleBubbleClick, onClick}: WordDispla
 
     return (
         <>
-        <Title>Title</Title>
+        <Title>Common words</Title>
         <Container onClick={onClick}>
             {bubbles}
         </Container>
