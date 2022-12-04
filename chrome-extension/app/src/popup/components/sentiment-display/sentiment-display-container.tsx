@@ -17,10 +17,8 @@ const Container = styled.div`
     flex-direction: column;
     align-items:center;
     justify-content: center;
-    height: 180px;
-    
-    border: 1px solid grey;
-    margin: 15px;
+    height: 120px;
+    margin: 5px 0 10px 0;
     
 `
 const BINS = 20

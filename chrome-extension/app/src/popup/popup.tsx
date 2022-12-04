@@ -87,7 +87,7 @@ const App = () => {
 
     return (
         <Container>
-            <Title title={`Insightor: ${videoId}`}/>
+            <Title title={`Insightor2: ${videoId}`}/>
             {(!showSentimentComments) && <WordDisplayContainer commentData={commentData}/>}
             <SentimentDisplayContainer 
                 sentiments={commentData?.sentiments} 

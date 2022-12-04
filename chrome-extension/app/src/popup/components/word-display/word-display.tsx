@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import WordBubble from '../word-bubble/word-bubble'
+import WordBubble from '../word-bubble/word-bubblev2'
 import WordBubbleDetail from '../word-bubble/word-bubble-detail'
 
 interface WordDisplayProps {
@@ -13,12 +13,23 @@ interface WordDisplayProps {
 type singleWord = [
     string, string, number
 ]
-
+    
 const Container = styled.div`
     display: flex;
-    justify-content: center;
+    justify-content: start;
     align-items: center;
     flex-flow: row wrap;
+    gap: 8px;
+    height: 190px;
+    overflow: hidden;
+`
+const Title = styled.div`
+    display: flex;
+    justify-content: start;
+    width: 100%;
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 8px;
 `
 
 const WordDisplay = ({words, detailWord, handleBubbleClick, onClick}: WordDisplayProps) => {
@@ -33,9 +44,14 @@ const WordDisplay = ({words, detailWord, handleBubbleClick, onClick}: WordDispla
     })
 
     return (
+        <>
+        <Title>Title</Title>
         <Container onClick={onClick}>
             {bubbles}
         </Container>
+        
+        </>
+        
     )
 }
 

@@ -13,7 +13,7 @@ const Container = styled.div`
     justify-content: center;
     align-items: end;
     width: 350px;
-    height: 180px;
+    height: 120px;
   
 `
 const Bar = styled.div`
@@ -23,7 +23,7 @@ const Bar = styled.div`
 `
 
 const SentimentDisplay = ({ sentiments, handleGraphClick }: SentimentDisplayProps) => {
-    const MAX_BAR_HEIGHT=150
+    const MAX_BAR_HEIGHT=120
     const WIDTH = 300;
 
     const CreateBar = (position, value, bins, maxValue) => {

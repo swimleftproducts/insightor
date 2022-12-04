@@ -18,8 +18,8 @@ interface WordDisplayContainerProps {
 const Container = styled.div`
     display: flex;
     flex-direction: column;
-    min-height: 250px;
-    max-height: 4250px;
+    max-height: 425px;
+    margin: 0px 16px;
 `
 const Loading = styled.div`
     display: flex;
@@ -60,8 +60,7 @@ const WordDisplayContainer = ({commentData}: WordDisplayContainerProps) => {
 
     return (
         <Container>
-                {words ? <WordDisplay onClick={clearBubbleDetail} words={words.slice(0,20)} detailWord={detailWord} handleBubbleClick={handleBubbleClick}/> : <Loading>Loading</Loading>}
-                
+                {words ? <WordDisplay onClick={clearBubbleDetail} words={words.slice(0,15)} detailWord={detailWord} handleBubbleClick={handleBubbleClick}/> : <Loading>Loading</Loading>}
         </Container>
     )
 }

@@ -33,7 +33,7 @@ const COLOR_MAP = {
 const Container = styled.div`
     display: inline-block;
     background: ${props => COLOR_MAP[props.pos]};
-    border: 1px solid grey;
+    border: 1px solid rgba(0, 0, 0, 0.16);
     display: inline-block;
     border-radius: 18px;
     margin: 3px 3px;
