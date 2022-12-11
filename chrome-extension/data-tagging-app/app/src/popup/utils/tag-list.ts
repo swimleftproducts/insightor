@@ -1,70 +1,96 @@
+const POS_COLOR = ' linear-gradient(180deg, #4BD980 0%, #3CB067 100%);'
+const NEUTRAL_COLOR = 'linear-gradient(180deg, #F2C287 0%, #D8AB73 100%);'
+const NEG_COLOR = 'linear-gradient(180deg, #F36161 0%, #CC4E4E 100%);'
+
 const NON_VARIABLE_TAG_LIST = [
     {
         label: 'Information',
-        value: 'information'
+        value: 'information',
+        color: 'linear-gradient(180deg, #AAAAAA 0%, #8B8B8B 100%);'
     },
     {
         label: 'Advice give or ask',
-        value: 'advice'
+        value: 'advice',
+        color: 'linear-gradient(180deg, #469EAE 0%, #468894 100%);'
     },
     {
         label: 'Video content description',
-        value: 'video_content_description'
+        value: 'video_content_description',
+        color: 'linear-gradient(180deg, #FD6BB4 0%, #DB5C9B 100%);'
     },
     {
         label: 'Spam',
-        value: 'spam'
+        value: 'spam',
+        color: 'linear-gradient(180deg, #FFED47 0%, #DBCB39 100%);'
+    },
+    {
+        label: 'Skip',
+        value: 'skip',
+        color: 'white'
     }
 ]
 
 const TAG_LIST =[
     {
-        label: 'Impression positive',
-        value: 'impression_pos'
+        label: 'Impression',
+        value: 'impression_pos',
+        color: POS_COLOR
+        
     },
     {
-        label: 'Impression neutral',
-        value: 'impression_neutral'
+        label: 'Impression',
+        value: 'impression_neutral',
+        color: NEUTRAL_COLOR
     },
     {
-        label: 'Impression negative',
-        value: 'impression_neg'
+        label: 'Impression',
+        value: 'impression_neg',
+        color: NEG_COLOR
     },
     {
-        label: 'General conv. positive',
-        value: 'general_conversation_pos'
+        label: 'General Conv. ',
+        value: 'general_conversation_pos',
+        color: POS_COLOR
     },
     {
-        label: 'General conv. neutral',
-        value: 'general_conversation_neutral'
+        label: 'General Conv.',
+        value: 'general_conversation_neutral',
+        color: NEUTRAL_COLOR
     },
     {
-        label: 'General conv. negative',
-        value: 'general_conversation_neg'
+        label: 'General Conv.',
+        value: 'general_conversation_neg',
+        color: NEG_COLOR
     },
     {
-        label: 'Opinion positive',
-        value: 'opinion_pos'
+        label: 'Opinion',
+        value: 'opinion_pos',
+        color: POS_COLOR
     },
     {
-        label: 'Opinion neutral',
-        value: 'opinion_neutral'
+        label: 'Opinion',
+        value: 'opinion_neutral',
+        color: NEUTRAL_COLOR
     },
     {
-        label: 'Opinion negative',
-        value: 'opinion_neg'
+        label: 'Opinion',
+        value: 'opinion_neg',
+        color: NEG_COLOR
     },
     {
-        label: 'Personal feelings positive',
-        value: 'personal_feelings_pos'
+        label: 'Personal Feels',
+        value: 'personal_feelings_pos',
+        color: POS_COLOR
     },
     {
-        label: 'Personal feelings neutral',
-        value: 'personal_feelings_neutral'
+        label: 'Personal Feels ',
+        value: 'personal_feelings_neutral',
+        color: NEUTRAL_COLOR
     },
     {
-        label: 'Personal feelings negative',
-        value: 'personal_feelings_neg'
+        label: 'Personal Feels',
+        value: 'personal_feelings_neg',
+        color: NEG_COLOR
     },
 ]
 

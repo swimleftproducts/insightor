@@ -11,3 +11,14 @@ chrome.runtime.onMessage.addListener(
 function start(){
    console.log('got it')
 }
+
+chrome.runtime.onMessage.addListener((message) => {
+    if (message.type === 'save_comments_data') {
+       
+        const videoId = message.payload.videoId;
+        const data = message.payload.data
+        console.log('will save comments data', data, videoId)
+        localStorage.setItem('videoId',videoId)
+        localStorage.setItem('data', JSON.stringify(data))
+    }
+});

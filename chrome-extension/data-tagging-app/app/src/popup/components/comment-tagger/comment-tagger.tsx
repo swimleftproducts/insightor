@@ -99,17 +99,25 @@ const CommentTagger = ({categories, categoriesNonVariable, onTagClick, comment}:
         }
     }
     
+
     const renderVariablePills = () => {
         return categories.map((category, idx)=>{
+           
             return (
-                <PillButton wide  active={primaryTag===category.value}key={idx} color={category?.color} text={category.label} onClick={(e)=> handlePillClick(e, category.value)}/>
+                <PillButton wide active={primaryTag===category.value}key={idx} color={category?.color} text={category.label} onClick={(e)=> handlePillClick(e, category.value)}/>
             )
         })
     }
     const renderNonVariablePills = () => {
         return categoriesNonVariable.map((category, idx)=>{
+            let wide = true;
+            let narrow = false;
+            if (category.label === 'Spam' || category.label === 'Skip'){
+                narrow = true
+                wide = false
+            }
             return (
-                <PillButton active={primaryTag===category.value}key={idx} color={category?.color} text={category.label} onClick={(e)=> handlePillClick(e, category.value)}/>
+                <PillButton wide={wide} narrow={narrow} active={primaryTag===category.value} key={idx} color={category?.color} text={category.label} onClick={(e)=> handlePillClick(e, category.value)}/>
             )
         })
     }
@@ -128,13 +136,10 @@ const CommentTagger = ({categories, categoriesNonVariable, onTagClick, comment}:
                     <CategoryTitle>Neutral</CategoryTitle>
                     <CategoryTitle>Negative</CategoryTitle>
                 </TitleContainer>
-                    
                 <PillContainer>
                     {renderVariablePills()} 
                 </PillContainer>
             </Flex>
-           
-            
         </Container>
 
     )

@@ -72,6 +72,15 @@ const CommentTaggerContainer = ({ name }) => {
     const [nextPageToken, setNextPageToken] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
     // {video_title, comment_id, like_count, total_reply_count, comment, label_primary, label_secondary}
     const onTagClick = (taggedCommentData) => __awaiter(void 0, void 0, void 0, function* () {
+        // handle skip click and also when there is no comment 
+        if (taggedCommentData.label_primary === 'skip' || taggedCommentData.label_secondary === 'skip' || !taggedCommentData.comment) {
+            const [, ...newCommentList] = commentList;
+            //remove first element from comment list
+            setCommentList(newCommentList);
+            //update cache
+            localStorage.setItem('tagging_comment_list', JSON.stringify(newCommentList));
+            return;
+        }
         // sent labeled data to be stored in s3
         const s3UploadData = Object.assign({ "video_id": videoId, "video_title": videoMetaData.items[0].snippet.title, "video_category": videoMetaData.items[0].snippet.categoryId, "video_description": videoMetaData.items[0].snippet.description, "tagger": name }, taggedCommentData);
         try {
@@ -89,13 +98,20 @@ const CommentTaggerContainer = ({ name }) => {
     });
     const uploadAndSaveComments = () => __awaiter(void 0, void 0, void 0, function* () {
         try {
+            if (localStorage.getItem('endOfComments'))
+                return;
             const { items, nextPageToken: newNextPageToken } = yield (0,_services_getComments__WEBPACK_IMPORTED_MODULE_2__.getComments)(nextPageToken, videoId);
             console.log(items);
             setCommentList(items);
             setNextPageToken(newNextPageToken);
             localStorage.setItem('tagging_videoId', videoId);
             localStorage.setItem('tagging_comment_list', JSON.stringify(items));
-            localStorage.setItem('tagging_nextPageToken', newNextPageToken);
+            if (newNextPageToken) {
+                localStorage.setItem('tagging_nextPageToken', newNextPageToken);
+            }
+            else {
+                localStorage.setItem('endOfComments', 'true');
+            }
         }
         catch (err) {
             console.log(err);
@@ -116,6 +132,9 @@ const CommentTaggerContainer = ({ name }) => {
             setCommentList(JSON.parse(localStorage.getItem('tagging_comment_list')));
             setNextPageToken(localStorage.getItem('tagging_nextPageToken'));
             return true;
+        }
+        else {
+            localStorage.removeItem('endOfComments');
         }
         return false;
     };
@@ -266,7 +285,13 @@ const CommentTagger = ({ categories, categoriesNonVariable, onTagClick, comment 
     };
     const renderNonVariablePills = () => {
         return categoriesNonVariable.map((category, idx) => {
-            return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_pill_button__WEBPACK_IMPORTED_MODULE_2__["default"], { active: primaryTag === category.value, key: idx, color: category === null || category === void 0 ? void 0 : category.color, text: category.label, onClick: (e) => handlePillClick(e, category.value) }));
+            let wide = true;
+            let narrow = false;
+            if (category.label === 'Spam' || category.label === 'Skip') {
+                narrow = true;
+                wide = false;
+            }
+            return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_pill_button__WEBPACK_IMPORTED_MODULE_2__["default"], { wide: wide, narrow: narrow, active: primaryTag === category.value, key: idx, color: category === null || category === void 0 ? void 0 : category.color, text: category.label, onClick: (e) => handlePillClick(e, category.value) }));
         });
     };
     return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Container, null,
@@ -301,18 +326,21 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const StyledButton = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div `
-    width: ${props => props.wide ? '85' : '100'}px;
+    width: ${props => props.wide ? '85' : '110'}px;
+    width: ${props => props.narrow && '45'}px;
     height: 32px;
     border-radius: 16px;
     font-size: 10px;
     line-height: 10px;
     margin: 3px 3px;
     text-align: center;
+    border: 1px lightgrey solid;
     ${props => props.active && styled_components__WEBPACK_IMPORTED_MODULE_1__.css `
-      border: 2px solid black;
+      border: 1px solid black;
     `}
     background: lightgrey;
     background: ${props => props.color && props.color};
+    opactiy: .8;
     &:hover {
         filter: opacity(75%);
     }
@@ -321,10 +349,10 @@ const Container = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div 
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100%
+    height: 100%;
 `;
-const PillButton = ({ text, wide, onClick, color, active }) => {
-    return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(StyledButton, { wide: wide, active: active, onClick: onClick },
+const PillButton = ({ text, wide, narrow, onClick, color, active }) => {
+    return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(StyledButton, { wide: wide, narrow: narrow, active: active, onClick: onClick, color: color },
         react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Container, null,
             react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, text))));
 };
@@ -658,73 +686,99 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "NON_VARIABLE_TAG_LIST": () => (/* binding */ NON_VARIABLE_TAG_LIST),
 /* harmony export */   "TAG_LIST": () => (/* binding */ TAG_LIST)
 /* harmony export */ });
+const POS_COLOR = ' linear-gradient(180deg, #4BD980 0%, #3CB067 100%);'
+const NEUTRAL_COLOR = 'linear-gradient(180deg, #F2C287 0%, #D8AB73 100%);'
+const NEG_COLOR = 'linear-gradient(180deg, #F36161 0%, #CC4E4E 100%);'
+
 const NON_VARIABLE_TAG_LIST = [
     {
         label: 'Information',
-        value: 'information'
+        value: 'information',
+        color: 'linear-gradient(180deg, #AAAAAA 0%, #8B8B8B 100%);'
     },
     {
         label: 'Advice give or ask',
-        value: 'advice'
+        value: 'advice',
+        color: 'linear-gradient(180deg, #469EAE 0%, #468894 100%);'
     },
     {
         label: 'Video content description',
-        value: 'video_content_description'
+        value: 'video_content_description',
+        color: 'linear-gradient(180deg, #FD6BB4 0%, #DB5C9B 100%);'
     },
     {
         label: 'Spam',
-        value: 'spam'
+        value: 'spam',
+        color: 'linear-gradient(180deg, #FFED47 0%, #DBCB39 100%);'
+    },
+    {
+        label: 'Skip',
+        value: 'skip',
+        color: 'white'
     }
 ]
 
 const TAG_LIST =[
     {
-        label: 'Impression positive',
-        value: 'impression_pos'
+        label: 'Impression',
+        value: 'impression_pos',
+        color: POS_COLOR
+        
     },
     {
-        label: 'Impression neutral',
-        value: 'impression_neutral'
+        label: 'Impression',
+        value: 'impression_neutral',
+        color: NEUTRAL_COLOR
     },
     {
-        label: 'Impression negative',
-        value: 'impression_neg'
+        label: 'Impression',
+        value: 'impression_neg',
+        color: NEG_COLOR
     },
     {
-        label: 'General conv. positive',
-        value: 'general_conversation_pos'
+        label: 'General Conv. ',
+        value: 'general_conversation_pos',
+        color: POS_COLOR
     },
     {
-        label: 'General conv. neutral',
-        value: 'general_conversation_neutral'
+        label: 'General Conv.',
+        value: 'general_conversation_neutral',
+        color: NEUTRAL_COLOR
     },
     {
-        label: 'General conv. negative',
-        value: 'general_conversation_neg'
+        label: 'General Conv.',
+        value: 'general_conversation_neg',
+        color: NEG_COLOR
     },
     {
-        label: 'Opinion positive',
-        value: 'opinion_pos'
+        label: 'Opinion',
+        value: 'opinion_pos',
+        color: POS_COLOR
     },
     {
-        label: 'Opinion neutral',
-        value: 'opinion_neutral'
+        label: 'Opinion',
+        value: 'opinion_neutral',
+        color: NEUTRAL_COLOR
     },
     {
-        label: 'Opinion negative',
-        value: 'opinion_neg'
+        label: 'Opinion',
+        value: 'opinion_neg',
+        color: NEG_COLOR
     },
     {
-        label: 'Personal feelings positive',
-        value: 'personal_feelings_pos'
+        label: 'Personal Feels',
+        value: 'personal_feelings_pos',
+        color: POS_COLOR
     },
     {
-        label: 'Personal feelings neutral',
-        value: 'personal_feelings_neutral'
+        label: 'Personal Feels ',
+        value: 'personal_feelings_neutral',
+        color: NEUTRAL_COLOR
     },
     {
-        label: 'Personal feelings negative',
-        value: 'personal_feelings_neg'
+        label: 'Personal Feels',
+        value: 'personal_feelings_neg',
+        color: NEG_COLOR
     },
 ]
 

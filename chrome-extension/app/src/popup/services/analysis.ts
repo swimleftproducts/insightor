@@ -8,7 +8,6 @@ const getAnalysis = async (videoId) => {
         const {data, status} = await axios.get(API_URL,{
             videoId: videoId,
         })
-        console.log(data)
    }catch (error) {
         console.log(error)
    }

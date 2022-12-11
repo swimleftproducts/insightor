@@ -1,5 +1,5 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { css }from 'styled-components'
 import WordBubble from '../word-bubble/word-bubblev2'
 import WordBubbleDetail from '../word-bubble/word-bubble-detail'
 
@@ -20,7 +20,11 @@ const Container = styled.div`
     align-items: center;
     flex-flow: row wrap;
     gap: 8px;
-    height: 198px;
+    height: 190px;
+    ${props => props.allowExpandY && css`
+        height: unset;
+    `}
+    
     overflow: hidden;
 `
 const Title = styled.div`
@@ -46,7 +50,7 @@ const WordDisplay = ({words, detailWord, handleBubbleClick, onClick}: WordDispla
     return (
         <>
         <Title>Common words</Title>
-        <Container onClick={onClick}>
+        <Container onClick={onClick} allowExpandY={!!detailWord}>
             {bubbles}
         </Container>
         

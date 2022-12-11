@@ -173,7 +173,6 @@ const SentimentDisplay = ({ sentiments, handleGraphClick }) => {
             return;
         const onlyTotals = sentiments.map((item) => item.length);
         let maxValue = Math.max(...onlyTotals);
-        console.log('array of totals', onlyTotals);
         let totalBins = sentiments.length;
         const bars = sentiments.map((value, idx) => {
             return CreateBar(idx, value, totalBins, maxValue);
@@ -321,25 +320,6 @@ const COLOR_MAP = {
     VERB: 'linear-gradient(180deg, #4BD980 0%, #3CB067 100%);',
     X: 'linear-gradient(180deg, #FDFDFD 0%, #E7E7E7 100%);'
 };
-// const COLOR_MAP = {
-//     ADJ: 'yellow',
-//     ADP: 'teal',
-//     ADV: 'pink',
-//     AUX: 'grey',
-//     CCONJ: 'grey',
-//     DET: 'beige',
-//     INTJ: 'red',
-//     NOUN: 'blue',
-//     NUM: 'coral',
-//     PART: 'white',
-//     PRON: 'orange',
-//     PROPN: 'darkturquoise',
-//     PUNCT: 'white',
-//     SCONJ: 'darkgrey',
-//     SYM: 'hotpink',
-//     VERB: 'green',
-//     X: 'white'
-// }
 const Container = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div `
     display: inline-flex;
     align-items: center;
@@ -401,10 +381,11 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+const LONG_WORD_LENGTH = 10;
 const Container = styled_components__WEBPACK_IMPORTED_MODULE_2__["default"].div `
     display: flex;
     flex-direction: column;
-    max-height: 425px;
+    max-height: 550px;
     margin: 0px 16px;
 `;
 const Loading = styled_components__WEBPACK_IMPORTED_MODULE_2__["default"].div `
@@ -414,11 +395,13 @@ const Loading = styled_components__WEBPACK_IMPORTED_MODULE_2__["default"].div `
     font-size: 36px;
     color: darkgrey;
 `;
-const WordDisplayContainer = ({ commentData }) => {
+const WordDisplayContainer = ({ commentData, setHideSentimentAnalysis }) => {
     const [detailWord, setDetailWord] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
     const [words, setWords] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('');
     const handleBubbleClick = (word) => {
-        // serach for word in comments. return first three
+        // hide sentiment on clicking a bubble
+        setHideSentimentAnalysis(true);
+        // search for word in comments. return first three
         const searchResults = commentData.comments.filter((comment, idx) => {
             return comment.toLocaleLowerCase().includes(word.toLowerCase());
         });
@@ -432,10 +415,45 @@ const WordDisplayContainer = ({ commentData }) => {
             comments: reducedWordCountComments
         });
     };
-    const clearBubbleDetail = () => setDetailWord(null);
+    const clearBubbleDetail = () => {
+        setDetailWord(null);
+        setHideSentimentAnalysis(false);
+    };
+    const findLongWords = (words) => {
+        const wordsToPull = 3;
+        let foundWords = 0;
+        const results = [];
+        for (let index = 0; index < words.length; index++) {
+            const element = words[index];
+            if (element[0].length > LONG_WORD_LENGTH) {
+                const regex = /[.,:!?]/;
+                if (!regex.test(element[0])) {
+                    foundWords++;
+                    results.push(element);
+                }
+            }
+            if (foundWords === wordsToPull)
+                break;
+        }
+        return results;
+    };
     (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
         if (commentData) {
-            setWords(commentData === null || commentData === void 0 ? void 0 : commentData.words);
+            const words = commentData === null || commentData === void 0 ? void 0 : commentData.words.slice(0, 15);
+            //create array of long words
+            const longWords = findLongWords(commentData === null || commentData === void 0 ? void 0 : commentData.words);
+            longWords.map(longWord => {
+                //check if longword is in words
+                let isPresent = false;
+                words.map(word => {
+                    if (word[0] === longWord[0]) {
+                        isPresent = true;
+                    }
+                });
+                if (!isPresent)
+                    words.unshift(longWord);
+            });
+            setWords(words);
         }
     }, [commentData]);
     return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Container, null, words ? react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_word_display__WEBPACK_IMPORTED_MODULE_1__["default"], { onClick: clearBubbleDetail, words: words.slice(0, 15), detailWord: detailWord, handleBubbleClick: handleBubbleClick }) : react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Loading, null, "Loading")));
@@ -470,7 +488,11 @@ const Container = styled_components__WEBPACK_IMPORTED_MODULE_3__["default"].div 
     align-items: center;
     flex-flow: row wrap;
     gap: 8px;
-    height: 198px;
+    height: 190px;
+    ${props => props.allowExpandY && styled_components__WEBPACK_IMPORTED_MODULE_3__.css `
+        height: unset;
+    `}
+    
     overflow: hidden;
 `;
 const Title = styled_components__WEBPACK_IMPORTED_MODULE_3__["default"].div `
@@ -489,7 +511,7 @@ const WordDisplay = ({ words, detailWord, handleBubbleClick, onClick }) => {
     });
     return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null,
         react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Title, null, "Common words"),
-        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Container, { onClick: onClick }, bubbles)));
+        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Container, { onClick: onClick, allowExpandY: !!detailWord }, bubbles)));
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (WordDisplay);
 
@@ -531,6 +553,8 @@ const Container = styled_components__WEBPACK_IMPORTED_MODULE_5__["default"].div 
     html {
     margin: 0;
     padding: 0;
+    background: none;
+    border-radius: 25px;
     }
     color: black;
     background: white;
@@ -550,6 +574,7 @@ const App = () => {
     const [isYouTube, setIsYouTube] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(true);
     const [commentData, setCommentData] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
     const [showSentimentComments, setShowSentimentComments] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+    const [hideSentimentAnalysis, setHideSentimentAnalysis] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
     (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
         const getURL = () => __awaiter(void 0, void 0, void 0, function* () {
             let videoId;
@@ -571,8 +596,18 @@ const App = () => {
     (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
         if (!videoId)
             return;
+        // still working on this
+        // const message = {
+        //     type: 'get_comments',
+        //     payload: {
+        //         videoId
+        //     }
+        // }
+        // chrome.runtime.sendMessage(message);
         const getData = (videoId) => __awaiter(void 0, void 0, void 0, function* () {
             try {
+                console.log('video id is', videoId);
+                console.log('videoid in local is', localStorage.getItem('videoId'));
                 if (localStorage.getItem('videoId') !== videoId) {
                     const { data, status } = yield axios__WEBPACK_IMPORTED_MODULE_6__["default"].get(API_URL, {
                         params: { videoid: videoId, maxcomments: 250 },
@@ -599,8 +634,8 @@ const App = () => {
     }
     return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Container, null,
         react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_title__WEBPACK_IMPORTED_MODULE_2__["default"], { title: `Insightor2: ${videoId}` }),
-        (!showSentimentComments) && react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_word_display_word_display_container__WEBPACK_IMPORTED_MODULE_3__["default"], { commentData: commentData }),
-        react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_sentiment_display_sentiment_display_container__WEBPACK_IMPORTED_MODULE_4__["default"], { sentiments: commentData === null || commentData === void 0 ? void 0 : commentData.sentiments, comments: commentData === null || commentData === void 0 ? void 0 : commentData.comments, setShowSentimentComments: setShowSentimentComments, showSentimentComments: showSentimentComments })));
+        (!showSentimentComments) && react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_word_display_word_display_container__WEBPACK_IMPORTED_MODULE_3__["default"], { setHideSentimentAnalysis: setHideSentimentAnalysis, commentData: commentData }),
+        (!hideSentimentAnalysis) && react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_sentiment_display_sentiment_display_container__WEBPACK_IMPORTED_MODULE_4__["default"], { sentiments: commentData === null || commentData === void 0 ? void 0 : commentData.sentiments, comments: commentData === null || commentData === void 0 ? void 0 : commentData.comments, setShowSentimentComments: setShowSentimentComments, showSentimentComments: showSentimentComments })));
 };
 const body = document.body;
 body.style.margin = "0";

@@ -61,7 +61,9 @@ const Occurrence = styled.div`
 `
 
 const WordBubble = ({word, handleBubbleClick}: WordBubbleProps) => {
+    const postNegOrNuetral = (word) =>{
 
+    }
     const handleClick = (e) => {
         e.preventDefault()
         e.stopPropagation()

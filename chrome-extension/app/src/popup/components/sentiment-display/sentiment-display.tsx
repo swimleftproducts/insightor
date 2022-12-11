@@ -38,7 +38,6 @@ const SentimentDisplay = ({ sentiments, handleGraphClick }: SentimentDisplayProp
         if(!sentiments) return
         const onlyTotals= sentiments.map((item) => item.length)
         let maxValue = Math.max(...onlyTotals)
-        console.log('array of totals', onlyTotals)
         let totalBins = sentiments.length
         const bars = sentiments.map((value, idx)=> {
             return CreateBar(idx, value, totalBins, maxValue)

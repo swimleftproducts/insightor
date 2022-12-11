@@ -3,7 +3,6 @@ import styled from 'styled-components'
 import {createRoot} from 'react-dom/client'
 import Title from './components/title'
 import WordDisplayContainer from './components/word-display/word-display-container'
-import getAnalysis from './services/analysis'
 import axios from 'axios'
 import SentimentDisplayContainer from './components/sentiment-display/sentiment-display-container'
 
@@ -11,6 +10,8 @@ const Container = styled.div`
     html {
     margin: 0;
     padding: 0;
+    background: none;
+    border-radius: 25px;
     }
     color: black;
     background: white;
@@ -32,8 +33,8 @@ const App = () => {
     const [isYouTube, setIsYouTube] = useState(true)
     const [commentData, setCommentData] = useState<any>(null)
     const [showSentimentComments, setShowSentimentComments] = useState(false)
+    const [hideSentimentAnalysis, setHideSentimentAnalysis] = useState(false)
 
-   
     useEffect(()=>{
         const getURL = async () => {
             let videoId
@@ -54,8 +55,19 @@ const App = () => {
     
     useEffect(()=> {
         if (!videoId) return
+        // still working on this
+        // const message = {
+        //     type: 'get_comments',
+        //     payload: {
+        //         videoId
+        //     }
+        // }
+        // chrome.runtime.sendMessage(message);
+
         const getData = async (videoId) => {
             try{
+                console.log('video id is', videoId)
+                console.log('videoid in local is',localStorage.getItem('videoId'))
                 if (localStorage.getItem('videoId') !== videoId){
                     const {data, status} = await axios.get(API_URL,{
                         params: {videoid: videoId, maxcomments: 250},
@@ -88,12 +100,12 @@ const App = () => {
     return (
         <Container>
             <Title title={`Insightor2: ${videoId}`}/>
-            {(!showSentimentComments) && <WordDisplayContainer commentData={commentData}/>}
-            <SentimentDisplayContainer 
+            {(!showSentimentComments) && <WordDisplayContainer setHideSentimentAnalysis={setHideSentimentAnalysis}commentData={commentData}/>}
+            {(!hideSentimentAnalysis) && <SentimentDisplayContainer 
                 sentiments={commentData?.sentiments} 
                 comments={commentData?.comments} 
                 setShowSentimentComments={setShowSentimentComments} 
-                showSentimentComments={showSentimentComments}/>
+                showSentimentComments={showSentimentComments}/>}
         </Container>
     )
 }

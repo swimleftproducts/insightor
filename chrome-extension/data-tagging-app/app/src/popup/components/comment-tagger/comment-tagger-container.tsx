@@ -30,6 +30,16 @@ const CommentTaggerContainer = ({name}: CommentTaggerContainerProps) => {
 
     // {video_title, comment_id, like_count, total_reply_count, comment, label_primary, label_secondary}
     const onTagClick = async ( taggedCommentData) => {
+        // handle skip click and also when there is no comment 
+        if(taggedCommentData.label_primary==='skip' || taggedCommentData.label_secondary==='skip' || !taggedCommentData.comment){
+            const [,...newCommentList] = commentList
+            //remove first element from comment list
+            setCommentList(newCommentList)
+            //update cache
+            localStorage.setItem('tagging_comment_list', JSON.stringify(newCommentList))
+            return
+        }
+
         // sent labeled data to be stored in s3
         const s3UploadData = {
         "video_id": videoId,
@@ -54,13 +64,19 @@ const CommentTaggerContainer = ({name}: CommentTaggerContainerProps) => {
 
     const uploadAndSaveComments = async () => {
         try {
+            if(localStorage.getItem('endOfComments')) return
             const {items, nextPageToken:newNextPageToken} = await getComments(nextPageToken, videoId)
             console.log(items)
             setCommentList(items)
             setNextPageToken(newNextPageToken)
             localStorage.setItem('tagging_videoId',videoId)
             localStorage.setItem('tagging_comment_list', JSON.stringify(items))
-            localStorage.setItem('tagging_nextPageToken', newNextPageToken)
+            if(newNextPageToken){
+                localStorage.setItem('tagging_nextPageToken', newNextPageToken)
+            }else {
+                localStorage.setItem('endOfComments', 'true')
+            }
+            
 
         } catch(err){
             console.log(err)
@@ -81,6 +97,8 @@ const CommentTaggerContainer = ({name}: CommentTaggerContainerProps) => {
             setCommentList(JSON.parse(localStorage.getItem('tagging_comment_list')))
             setNextPageToken(localStorage.getItem('tagging_nextPageToken'))
             return true
+        } else{
+            localStorage.removeItem('endOfComments')
         }
         return false
     }
