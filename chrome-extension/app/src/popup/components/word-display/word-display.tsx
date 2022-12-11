@@ -4,16 +4,14 @@ import WordBubble from '../word-bubble/word-bubblev2'
 import WordBubbleDetail from '../word-bubble/word-bubble-detail'
 
 interface WordDisplayProps {
-    onClick: () => void,
-    words: singleWord[],
-    detailWord?: any,
-    handleBubbleClick: (word: string) => void,
+	onClick: () => void;
+	words: singleWord[];
+	detailWord?: any;
+	handleBubbleClick: (word: string) => void;
 }
 
-type singleWord = [
-    string, string, number
-]
-    
+type singleWord = [string, string, number];
+
 const Container = styled.div`
     display: flex;
     justify-content: start;
@@ -24,28 +22,27 @@ const Container = styled.div`
     ${props => props.allowExpandY && css`
         height: unset;
     `}
-    
-    overflow: hidden;
+    overflow: scroll;
+	::-webkit-scrollbar {
+		width: 0;
+		height: 0;
+	}
 `
 const Title = styled.div`
-    display: flex;
-    justify-content: start;
-    width: 100%;
-    font-size: 1rem;
-    font-weight: bold;
-    margin-bottom: 8px;
-`
+	display: flex;
+	justify-content: start;
+	width: 100%;
+	font-size: 1rem;
+	font-weight: bold;
+	margin-bottom: 8px;
+`;
 
-const WordDisplay = ({words, detailWord, handleBubbleClick, onClick}: WordDisplayProps) => {
-
-    const bubbles = words.map((word,idx) => {
-        if (word[0] !== detailWord?.word) return (
-            <WordBubble key={idx} word={word} handleBubbleClick={handleBubbleClick} />
-        )
-        return (
-            <WordBubbleDetail key={idx} word={word} comments={detailWord?.comments}/>
-        )
-    })
+const WordDisplay = ({ words, detailWord, handleBubbleClick, onClick }: WordDisplayProps) => {
+	const bubbles = words.map((word, idx) => {
+		if (word[0] !== detailWord?.word)
+			return <WordBubble key={idx} word={word} handleBubbleClick={handleBubbleClick} />;
+		return <WordBubbleDetail key={idx} word={word} comments={detailWord?.comments} />;
+	});
 
     return (
         <>
@@ -53,9 +50,7 @@ const WordDisplay = ({words, detailWord, handleBubbleClick, onClick}: WordDispla
         <Container onClick={onClick} allowExpandY={!!detailWord}>
             {bubbles}
         </Container>
-        
         </>
-        
     )
 }
 
