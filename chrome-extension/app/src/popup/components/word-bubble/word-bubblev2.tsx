@@ -56,3 +56,21 @@ const WordBubble = ({ word, handleBubbleClick }: WordBubbleProps) => {
 };
 
 export default WordBubble;
+
+/*
+user gives pin 1111
+
+server
+1111 ->  uuid123
+
+
+return uuid to user 
+
+have them use that for all requests
+
+person 1 
+1111 ->  uuid123
+
+person 2
+1111 ->  uuid123
+*/

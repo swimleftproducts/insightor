@@ -3,9 +3,9 @@
     "name": "insightor-data-label",
     "version": "1.0.0",
     "icons":{
-        "16": "icon-32x32.png",
-        "32": "icon-32x32.png",
-        "48": "icon-32x32.png"
+        "16": "icon32.png",
+        "32": "icon32.png",
+        "48": "icon32.png"
     },
     "options_page": "options.html",
     "action": {

@@ -33,7 +33,7 @@ module.exports = {
         new CopyPlugin({
           patterns: [
             { from: path.resolve('src/manifest.json'), to: path.resolve('dist') },
-            { from: path.resolve('src/assets/icon-32x32.png'), to: path.resolve('dist')}
+            { from: path.resolve('src/assets/icon32.png'), to: path.resolve('dist')}
           ],
         }),
         ...getHtmlPlugins([
