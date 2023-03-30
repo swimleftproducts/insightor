@@ -5,6 +5,23 @@ import datetime
 
 INDEX = 'insightor-gpt'
 
+def does_video_have_namespace(video_id):
+    """
+    Check if the specified video ID has a namespace in Pinecone API
+    Arguments:
+    - video_id: ID of the video to check
+
+    Returns:
+    - exists: Boolean, indicating whether the video ID has a namespace in Pinecone API
+    """
+    index = pinecone.Index(INDEX) 
+
+    index_stats_response = index.describe_index_stats()
+    namespaces = index_stats_response.get('namespaces')
+
+    exists = video_id in namespaces
+    return exists
+
 def format_embeddings(embeddings, video_id):
     """
     Format the embeddings into the format required by Pinecone API
@@ -54,12 +71,39 @@ def upsert_to_pinecone(video_id, embeddings, batch_size=100):
     """
     index = pinecone.Index(INDEX) 
     formatted_embeddings = format_embeddings(embeddings, video_id)   
-    print(formatted_embeddings[0])
     for i in range(0, len(formatted_embeddings), batch_size):
         batch = formatted_embeddings[i:i + batch_size]
         
-        # upsert_response = index.upsert(
-        #     vectors=batch,
-        #     namespace=video_id
-        # )
-    
+        upsert_response = index.upsert(
+            vectors=batch,
+            namespace=video_id
+        )
+    return upsert_response
+
+def get_context(query_embedding, video_id, k):
+    """
+    Get the k nearest neighbors of a query embedding from the Pinecone API
+
+    Arguments:
+    - query_embedding: The embedding of the text for which to find the nearest neighbors
+    - video_id: ID of the video associated with the comments
+    - k: Number of nearest neighbors to return
+
+    Returns:
+    - matches: List of dictionaries, where each dictionary has the format:
+        {
+            'id': str,
+            'metadata': Dict,
+            'score': float,
+            'values': List
+        }
+    """
+    index = pinecone.Index(INDEX) 
+    query_response = index.query(
+        namespace=video_id,
+        top_k=k,
+        include_values=False,
+        include_metadata=True,
+        vector=query_embedding,
+    )
+    return query_response['matches']
