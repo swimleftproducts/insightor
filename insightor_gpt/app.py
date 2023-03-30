@@ -27,7 +27,7 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 
 @app.route('/health-check', methods=['GET'])
 def index():
-    return 'service healthy'
+    return 'service Healthy'
 
 
 @app.route('/user-query', methods=['POST'])
