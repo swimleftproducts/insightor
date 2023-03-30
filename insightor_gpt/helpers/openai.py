@@ -50,17 +50,19 @@ def format_comments(relevant_context):
     formatted_comments = " ### ".join([comment['metadata']['text'] for comment in relevant_context])
     return formatted_comments
 
-SYSTEM_PROMPT = """Please analyze the user's query and select the most relevant comment(s) from the provided comments
-block that best address the user's query. The query follows QUERY and the comments follow COMMENTS:
-and each comment is separated by '###'
+SYSTEM_PROMPT = """You are InsightorGPT, a tool for providing insight into youtube comments.
+Please analyze the user's query and select the most relevant comment(s) from the provided 
+comments block that best address the user's query. The query follows QUERY and the comments follow COMMENTS:
+and each comment is separated by '###'. Return the top 5 comments separated by ## and no other text.
 """
 
 def get_gpt_response(query, relevant_context):
     formatted_comments = format_comments(relevant_context)
     query_plus_context = f"QUERY:{query} COMMENTS:{formatted_comments}"
-
+    with open('querycontext.txt', 'w') as f:
+        f.write(formatted_comments)
     generated_text = generate_chat_completion(query_plus_context)
-    print(generated_text)
+    return generated_text
 
 def generate_chat_completion(query_plus_context):
     # Define the request parameters

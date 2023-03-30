@@ -40,9 +40,8 @@ def user_query():
     # get all you tube comments and
     response =   user_query_controller.main(query, video_id, YOUTUBE_API_KEY)
 
-    response_placeholder = 'lots of good content from gpt'
     return json.dumps({
-        "response": response_placeholder
+        "relevant_comments": response
     })
 
 

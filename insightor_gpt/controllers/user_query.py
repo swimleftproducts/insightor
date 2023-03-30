@@ -1,6 +1,7 @@
 import services.youtube as youtube
 import helpers.openai as openaicalls
 import helpers.pinecone as pinecone
+import helpers.response as response
 
 def main(query, video_id, YOUTUBE_API_KEY):
     #see if comments have been pulled previously 
@@ -20,4 +21,4 @@ def main(query, video_id, YOUTUBE_API_KEY):
     # now get nearest 50  comments
     relevant_context = pinecone.get_context(query_embedding, video_id, 50)
     response_from_ai = openaicalls.get_gpt_response(query, relevant_context)
-    pass
+    return response.parse_response(response_from_ai)
