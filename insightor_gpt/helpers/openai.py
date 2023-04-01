@@ -1,5 +1,8 @@
 import openai
 import tiktoken
+import time
+
+MAX_COMPLETION_TOKENS = 450
 
 def remove_newlines(text):
     text = text.replace('\n', ' ')
@@ -10,6 +13,28 @@ def remove_newlines(text):
 
 def get_query_embedding(query, model="text-embedding-ada-002"):
     return openai.Embedding.create(input=query, model=model)['data'][0]['embedding']
+
+
+def batch_comments(comments , max_tokens= 5500):
+    batches = []
+    current_batch = []
+    current_tokens = 0
+
+    for comment in comments:
+        num_tokens = num_tokens_from_string(comment)
+
+        if current_tokens + num_tokens > max_tokens:
+            batches.append(current_batch)
+            current_batch = []
+            current_tokens = 0
+
+        current_batch.append(comment)
+        current_tokens += num_tokens
+
+    if current_batch:
+        batches.append(current_batch)
+
+    return batches
 
 
 def get_embedding(comments, model="text-embedding-ada-002"):
@@ -31,13 +56,26 @@ def get_embedding(comments, model="text-embedding-ada-002"):
     This function is currently rate limited and may need to be modified to handle batching of API calls.
     """
     comments = [remove_newlines(comment) for comment in comments]
-    embeddings = openai.Embedding.create(input=comments, model=model)['data']
+    print('Embedding this many comments:', len(comments))
+
     result = []
-    for i, embedding in enumerate(embeddings):
-        result.append({
-            'vector': embedding['embedding'],
-            'text': comments[i]
-        })
+    batches = batch_comments(comments)
+
+    for batch in batches:
+        print('doing a batch', len(batch))
+        try:
+            embeddings = openai.Embedding.create(input=batch, model=model)['data']
+            
+            for i, embedding in enumerate(embeddings):
+                if (embedding['index'] != i):
+                    print('mismatched embedding index')
+                result.append({
+                    'vector': embedding['embedding'],
+                    'text': batch[i]
+                })
+        except Exception as e:
+            print(f"Error occurred while embedding comments: {e}")
+
     return result
 
 def num_tokens_from_string(string: str, encoding_name: str='cl100k_base') -> int:
@@ -46,22 +84,41 @@ def num_tokens_from_string(string: str, encoding_name: str='cl100k_base') -> int
     num_tokens = len(encoding.encode(string))
     return num_tokens
 
-def format_comments(relevant_context):
-    formatted_comments = " ### ".join([comment['metadata']['text'] for comment in relevant_context])
+def format_comments(relevant_context):    
+    formatted_comments = []
+    start = time.time()
+    total_tokens = num_tokens_from_string(SYSTEM_PROMPT)
+    
+    for comment in relevant_context:
+        text = str(comment['metadata']['text'])
+        tokens = num_tokens_from_string(text)
+        
+        if total_tokens + tokens + MAX_COMPLETION_TOKENS<= 4000:
+            formatted_comments.append(text)
+            total_tokens += tokens
+        else:
+            break
+
+    formatted_comments = " ### ".join(formatted_comments)
+    end = time.time()
     return formatted_comments
 
-SYSTEM_PROMPT = """You are InsightorGPT, a tool for providing insight into youtube comments.
-Please analyze the user's query and select the most relevant comment(s) from the provided 
-comments block that best address the user's query. The query follows QUERY and the comments follow COMMENTS:
-and each comment is separated by '###'. Return the top 5 comments separated by ## and no other text.
+# SYSTEM_PROMPT = """You are InsightorGPT, a tool for providing insight into YouTube comments. You are provided a query and a list of comments separated by ###.
+# Create a list of the 2 comments that best answers the query. Only consider comments in the list of comments. The list should look like:
+# *- example comment1
+# *- example comment2
+# If no comments are relevant to the query, respond NONE"""
+SYSTEM_PROMPT = """
+    Please provide a biased summary of the comments provided to you in the context of the query provided. The summary should confirm
+    the any query bias and do not provide any counter points. Phrase the summary like a news article
 """
+
 
 def get_gpt_response(query, relevant_context):
     formatted_comments = format_comments(relevant_context)
     query_plus_context = f"QUERY:{query} COMMENTS:{formatted_comments}"
-    with open('querycontext.txt', 'w') as f:
-        f.write(formatted_comments)
     generated_text = generate_chat_completion(query_plus_context)
+    print('response is', generated_text)
     return generated_text
 
 def generate_chat_completion(query_plus_context):
@@ -72,11 +129,15 @@ def generate_chat_completion(query_plus_context):
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": query_plus_context}
     ]
+
+    with open('recent_ask.txt', "w") as f:
+        f.write(SYSTEM_PROMPT + "\n")
+        f.write(query_plus_context)
     
     params = {
         "model": model_engine,
         "messages": messages,
-        "max_tokens": 300,
+        "max_tokens": MAX_COMPLETION_TOKENS,
         "temperature": 0,
     }
 

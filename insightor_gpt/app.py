@@ -5,6 +5,7 @@ import json
 import openai
 import pinecone
 import controllers.user_query as user_query_controller
+import controllers.general_tasks as general_tasks
 
 mode = os.environ.get('MODE', 'local')
 
@@ -43,6 +44,20 @@ def user_query():
     return json.dumps({
         "relevant_comments": response
     })
+
+@app.route('/delete_namespace', methods=['POST'])
+def delete_namespace():
+    request_data = request.get_json()
+
+    video_id = request_data.get('video_id')
+
+    # delete namespace
+    general_tasks.delete_namespace(video_id)
+
+    return json.dumps({
+        "success": True
+    })
+
 
 
 if __name__ == '__main__':

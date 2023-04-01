@@ -14,7 +14,9 @@ def main(query, video_id, YOUTUBE_API_KEY):
         all_comments = youtube.get_all_comments(video_id, YOUTUBE_API_KEY)
         #get list of embedded comments with dicts of form
         #{vector: [1,2,323], text: string}
+        print('about to embed')
         embedded_comments = openaicalls.get_embedding(all_comments)
+        print('about to upsert')
         pinecone.upsert_to_pinecone(video_id, embedded_comments)
     # now all comments are in vector db, we need to embed the query
     query_embedding = openaicalls.get_query_embedding(query)
@@ -22,3 +24,4 @@ def main(query, video_id, YOUTUBE_API_KEY):
     relevant_context = pinecone.get_context(query_embedding, video_id, 50)
     response_from_ai = openaicalls.get_gpt_response(query, relevant_context)
     return response.parse_response(response_from_ai)
+

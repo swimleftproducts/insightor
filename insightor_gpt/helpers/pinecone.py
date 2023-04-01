@@ -22,6 +22,13 @@ def does_video_have_namespace(video_id):
     exists = video_id in namespaces
     return exists
 
+def delete_namespace(video_id):
+
+    index = pinecone.Index(INDEX) 
+
+    response = index.delete(deleteAll='true', namespace=video_id)
+    return response
+
 def format_embeddings(embeddings, video_id):
     """
     Format the embeddings into the format required by Pinecone API
@@ -106,4 +113,5 @@ def get_context(query_embedding, video_id, k):
         include_metadata=True,
         vector=query_embedding,
     )
+    print('top context reply is \n', query_response['matches'][0]['metadata']['text'])
     return query_response['matches']
