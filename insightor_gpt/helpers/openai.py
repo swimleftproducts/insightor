@@ -108,23 +108,26 @@ def format_comments(relevant_context):
 # *- example comment1
 # *- example comment2
 # If no comments are relevant to the query, respond NONE"""
+# SYSTEM_PROMPT = """
+#     Please provide a summary of the comments provided to you in the context of the query provided. 
+# """
 SYSTEM_PROMPT = """
-    Please provide a biased summary of the comments provided to you in the context of the query provided. The summary should confirm
-    the any query bias and do not provide any counter points. Phrase the summary like a news article
+    Task: provide the 3 comments most related in sentiment or that answer the provided query. 
+    start each returned comment like this:  - example comment1
 """
 
+
+# Define the request parameters
+model_engine = "gpt-3.5-turbo"  # Replace with the model you want to use
 
 def get_gpt_response(query, relevant_context):
     formatted_comments = format_comments(relevant_context)
     query_plus_context = f"QUERY:{query} COMMENTS:{formatted_comments}"
     generated_text = generate_chat_completion(query_plus_context)
-    print('response is', generated_text)
+    print('\nai reply', generated_text)
     return generated_text
 
 def generate_chat_completion(query_plus_context):
-    # Define the request parameters
-    model_engine = "gpt-3.5-turbo"  # Replace with the model you want to use
-    
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": query_plus_context}
@@ -138,7 +141,7 @@ def generate_chat_completion(query_plus_context):
         "model": model_engine,
         "messages": messages,
         "max_tokens": MAX_COMPLETION_TOKENS,
-        "temperature": 0,
+        "temperature": .2,
     }
 
     # Make the API request
@@ -148,3 +151,35 @@ def generate_chat_completion(query_plus_context):
     generated_text = response['choices'][0]['message']['content'].strip()
 
     return generated_text
+
+
+def get_HyDE(query,title, k=1):
+    # todo: call youtube to get video title
+    HyDE_Prompt = f"""
+        Task: A person is looking for youtube comments based on a query. Give {k} example 35 word youtube comment(s) 
+        that exactly reword to the query's sentiments. start each comment with #. It is important to match the type of 
+        comments that actually occur. In this case the comments may be rude, or angry.
+        Video title: {title}
+        Query: {query}
+        COMMENT:
+    """
+    
+    messages = [
+        {"role": "user", "content": HyDE_Prompt}
+    ]
+
+    params = {
+        "model": model_engine,
+        "messages": messages,
+        "max_tokens": 250,
+        "temperature": .4,
+    }
+
+    # Make the API request
+    response = openai.ChatCompletion.create(**params)
+
+    # Extract the generated text from the response
+    generated_text = response['choices'][0]['message']['content'].strip()
+
+    return generated_text
+

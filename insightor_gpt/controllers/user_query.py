@@ -3,6 +3,7 @@ import helpers.openai as openaicalls
 import helpers.pinecone as pinecone
 import helpers.response as response
 
+
 def main(query, video_id, YOUTUBE_API_KEY):
     #see if comments have been pulled previously 
     # TODO: check time stamp and maybe repull
@@ -18,10 +19,18 @@ def main(query, video_id, YOUTUBE_API_KEY):
         embedded_comments = openaicalls.get_embedding(all_comments)
         print('about to upsert')
         pinecone.upsert_to_pinecone(video_id, embedded_comments)
+
+    # use HyDE, comment out block to remove using it
+    title = youtube.get_video_title(video_id)
+    print(title)
+    hypothetical_responses = openaicalls.get_HyDE(query,title, 2).replace('#',"")    
+    query = hypothetical_responses
+
     # now all comments are in vector db, we need to embed the query
     query_embedding = openaicalls.get_query_embedding(query)
+   
     # now get nearest 50  comments
-    relevant_context = pinecone.get_context(query_embedding, video_id, 50)
+    relevant_context = pinecone.get_context(query_embedding, video_id, 20)
     response_from_ai = openaicalls.get_gpt_response(query, relevant_context)
     return response.parse_response(response_from_ai)
 

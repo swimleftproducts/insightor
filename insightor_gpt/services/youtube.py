@@ -59,3 +59,25 @@ def get_all_comments(video_id, YOUTUBE_API_KEY):
 
     return comments
 
+def get_video_title(video_id):
+    """
+    Retrieves the title of a YouTube video by its ID using the YouTube Data API v3.
+
+    Args:
+        video_id (str): The ID of the YouTube video.
+        api_key (str): Your Google API key.
+
+    Returns:
+        str: The title of the YouTube video.
+    """
+    YOUTUBE_API_KEY = os.environ.get('GOOGLE_API_KEY')
+    url = f'https://www.googleapis.com/youtube/v3/videos?id={video_id}&part=snippet&key={YOUTUBE_API_KEY}'
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        data = response.json()
+        title = data['items'][0]['snippet']['title']
+        return title
+    else:
+        print(f'Error retrieving video title. Status code: {response.status_code}')
+        return None

@@ -113,5 +113,5 @@ def get_context(query_embedding, video_id, k):
         include_metadata=True,
         vector=query_embedding,
     )
-    print('top context reply is \n', query_response['matches'][0]['metadata']['text'])
+
     return query_response['matches']
