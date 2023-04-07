@@ -1,8 +1,12 @@
 import openai
 import tiktoken
 import time
+import os
 
 MAX_COMPLETION_TOKENS = 450
+
+def openai_init():
+    openai.api_key = os.environ.get('OPENAI_API_KEY')
 
 def remove_newlines(text):
     text = text.replace('\n', ' ')

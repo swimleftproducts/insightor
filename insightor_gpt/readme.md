@@ -17,10 +17,4 @@ Running on aws:
     build container 
         docker build -t flask_app .
     ### TOBE DETERMINED
-    <!-- log (not always needed)
-        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 216068982475.dkr.ecr.us-east-1.amazonaws.com
-    Retag
-        docker tag flask_app:latest 216068982475.dkr.ecr.us-east-1.amazonaws.com/yob_or_not:latest
-
-    Push 
-        docker push 216068982475.dkr.ecr.us-east-1.amazonaws.com/yob_or_not:latest -->
+    

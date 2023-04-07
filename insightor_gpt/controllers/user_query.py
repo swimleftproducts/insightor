@@ -21,9 +21,11 @@ def main(query, video_id, YOUTUBE_API_KEY):
         pinecone.upsert_to_pinecone(video_id, embedded_comments)
 
     # use HyDE, comment out block to remove using it
+    print("user query is:" , query, '\n')
     title = youtube.get_video_title(video_id)
     print(title)
     hypothetical_responses = openaicalls.get_HyDE(query,title, 2).replace('#',"")    
+    print('hypothetical responses: ', hypothetical_responses, '\n')
     query = hypothetical_responses
 
     # now all comments are in vector db, we need to embed the query
@@ -32,5 +34,6 @@ def main(query, video_id, YOUTUBE_API_KEY):
     # now get nearest 50  comments
     relevant_context = pinecone.get_context(query_embedding, video_id, 20)
     response_from_ai = openaicalls.get_gpt_response(query, relevant_context)
+    print('actual responses', response.parse_response(response_from_ai))
     return response.parse_response(response_from_ai)
 
