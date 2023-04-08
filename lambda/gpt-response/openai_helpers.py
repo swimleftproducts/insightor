@@ -127,17 +127,17 @@ model_engine = "gpt-3.5-turbo"  # Replace with the model you want to use
 def get_gpt_response(query, relevant_context):
     formatted_comments = format_comments(relevant_context)
     query_plus_context = f"QUERY:{query} COMMENTS:{formatted_comments}"
-    generated_text = generate_chat_completion(query_plus_context)
+    generated_text = generate_chat_completion(query_plus_context, SYSTEM_PROMPT)
     return generated_text
 
-def generate_chat_completion(query_plus_context):
+def generate_chat_completion(query_plus_context, system_prompt=''):
     messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "system", "content": system_prompt},
         {"role": "user", "content": query_plus_context}
     ]
 
     with open('recent_ask.txt', "w") as f:
-        f.write(SYSTEM_PROMPT + "\n")
+        f.write(system_prompt + "\n")
         f.write(query_plus_context)
     
     params = {
@@ -156,12 +156,12 @@ def generate_chat_completion(query_plus_context):
     return generated_text
 
 
+
 def get_HyDE(query,title, k=1):
-    # todo: call youtube to get video title
     HyDE_Prompt = f"""
         Task: A person is looking for youtube comments based on a query. Give {k} example 35 word youtube comment(s) 
         that exactly reword to the query's sentiments. start each comment with #. It is important to match the type of 
-        comments that actually occur. In this case the comments may be rude, or angry.
+        comments that actually occur. In this case the comments may be rude, or angry, they also may be positive, supportive or neutral.
         Video title: {title}
         Query: {query}
         COMMENT:

@@ -56,3 +56,62 @@ def get_all_comments(video_id):
     print(f"Elapsed time: {elapsed_time:.2f} seconds")
 
     return comments
+
+def get_video_title(video_id):
+    """
+    Retrieves the title of a YouTube video by its ID using the YouTube Data API v3.
+
+    Args:
+        video_id (str): The ID of the YouTube video.
+        api_key (str): Your Google API key.
+
+    Returns:
+        str: The title of the YouTube video.
+    """
+    YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
+    url = f'https://www.googleapis.com/youtube/v3/videos?id={video_id}&part=snippet&key={YOUTUBE_API_KEY}'
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        data = response.json()
+        title = data['items'][0]['snippet']['title']
+        return title
+    else:
+        print(f'Error retrieving video title. Status code: {response.status_code}')
+        return None
+
+def get_first_five_comments(video_id):
+    """
+    Retrieve the first 5 comments for a given YouTube video.
+
+    Parameters:
+    video_id (str): The video id of the desired video.
+
+    Returns:
+    list: A list of the first 5 comments for the video.
+    """
+    YOUTUBE_API_KEY = os.environ['YOUTUBE_API_KEY']
+    params = {
+        'part': 'snippet',
+        'videoId': video_id,
+        'key': YOUTUBE_API_KEY,
+        'maxResults': 5,
+    }
+    # Send a GET request to the API endpoint
+    response = requests.get(API_ENDPOINT, params=params)
+
+    # Check if the request was successful
+    if response.status_code == 200:
+        # Extract the comments from the response JSON
+        comments = []
+        data = response.json()
+        for item in data['items']:
+            comments.append(item['snippet']['topLevelComment']['snippet']['textOriginal'])
+    else:
+        # Extract and print the error message from the response JSON
+        error = response.json()['error']
+        code = error['code']
+        message = error['message']
+        print(f"Request failed with error code {code}: {message}")
+
+    return comments

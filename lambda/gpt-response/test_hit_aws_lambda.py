@@ -4,7 +4,7 @@ import json
 url = "https://lnnqxaqalmxee46exnov3jupsa0srghv.lambda-url.us-east-1.on.aws/"
 
 payload = json.dumps({
-  "query": "what is red?",
+  "query": "what is should I do?",
   "video_id": "CfuhRVM1ntQ"
 })
 headers = {

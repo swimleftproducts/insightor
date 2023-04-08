@@ -12,7 +12,7 @@ os.environ['MODE'] = 'local'
 
 event = {
     'body': json.dumps({
-        'query': 'what is the weather like today?',
+        'query': 'great video, what should I do next?',
         'video_id': 'CfuhRVM1ntQ'
     })
 }
