@@ -7,7 +7,7 @@ interface QueryInputContainerProps {
   videoId: string;
   setShowSentimentComments: (show: boolean) => void;
   setHideSentimentAnalysis: (hide: boolean) => void;
-  setGPTResponse: (relevant_comments: string[]) => void,
+  setGPTResponse: (any) => void,
   setShowSpinner: any
 }
 
@@ -37,7 +37,7 @@ const QueryInputContainer: React.FC<QueryInputContainerProps> = ({
         setHideSentimentAnalysis(true)
         setShowSpinner(true)
         const response = await queryGPT.makeQuery(videoId, query)
-        setGPTResponse(response?.relevant_comments)
+        setGPTResponse(response)
         setShowSpinner(false)
         
       } catch (error) {

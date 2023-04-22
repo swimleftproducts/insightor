@@ -80,12 +80,13 @@ def get_video_title(video_id):
         print(f'Error retrieving video title. Status code: {response.status_code}')
         return None
 
-def get_first_five_comments(video_id):
+def get_k_comments(video_id, k):
     """
-    Retrieve the first 5 comments for a given YouTube video.
+    Retrieve k comments for a given YouTube video.
 
     Parameters:
     video_id (str): The video id of the desired video.
+    k (number): The number of comments to return, up to 100
 
     Returns:
     list: A list of the first 5 comments for the video.
@@ -95,7 +96,7 @@ def get_first_five_comments(video_id):
         'part': 'snippet',
         'videoId': video_id,
         'key': YOUTUBE_API_KEY,
-        'maxResults': 5,
+        'maxResults': k,
     }
     # Send a GET request to the API endpoint
     response = requests.get(API_ENDPOINT, params=params)

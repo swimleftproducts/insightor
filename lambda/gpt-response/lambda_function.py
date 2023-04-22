@@ -31,13 +31,21 @@ def lambda_handler(event, context):
     title = youtube_helpers.get_video_title(video_id)
     print('Video_title: ',title)
     
-    # get llm
-
-    not_langchain_helpers.summarize_top_comments(video_id,title)
-    #comments = not_langchain_helpers.get_relevant_comments(query, title, video_id)
+    # desired response type
+    response_type = not_langchain_helpers.want_summary_or_comments(query,title)
+    print(response_type)
+    if response_type == 'summary':
+        response = not_langchain_helpers.summarize_top_k_comments(query, video_id,title,55)
+        print('summary response', response)
+        if 'none' in response.lower():
+            response = not_langchain_helpers.get_relevant_comments(query, title, video_id)
+            response_type = 'comment list'
+    else:
+        response = not_langchain_helpers.get_relevant_comments(query, title, video_id)
 
     return json.dumps({
         'statusCode': 200,
-        'response_to': is_new_video,
-        'comments': comments
+        'is_new_video': is_new_video,
+        'response_type': response_type,
+        'response': response
     })

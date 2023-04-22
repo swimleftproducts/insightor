@@ -30,12 +30,27 @@ const StyledText = styled.div`
     font-size: 24px;
     padding: 0px 18px 18px;
 `
+const HelperText = styled.div`
+    padding-right: 40px;
+    font-size: 12px;
+    font-weight: 300;
+    position: absolute;
+    top: 110px;
+    width: 95%;
+    text-align: end;
+`
+interface ResponseData {
+    statusCode: number,
+    is_new_video: boolean,
+    response_type: string,
+    response: string | string[],
+}
 
 const App = () => {
     const [videoId, setVideoId] = useState<null|string>(null)
     const [isYouTube, setIsYouTube] = useState(true)
     const [commentData, setCommentData] = useState<any>(null)
-    const [gptResponse, setGPTResponse] = useState<string[] | null>(null)
+    const [gptResponse, setGPTResponse] = useState<ResponseData | null>(null)
     const [showSpinner, setShowSpinner] = useState(false)
     const [showSentimentComments, setShowSentimentComments] = useState(false)
     const [hideSentimentAnalysis, setHideSentimentAnalysis] = useState(false)
@@ -104,6 +119,7 @@ const App = () => {
         <Container>
             <Title title={`Insightor2: ${videoId}`}/>
             <QueryInputContainer videoId={videoId} setGPTResponse={setGPTResponse} setShowSpinner={setShowSpinner} setShowSentimentComments={setShowSentimentComments} setHideSentimentAnalysis={setHideSentimentAnalysis}/>
+            {(!gptResponse) &&<HelperText><p>I am good at giving summaries or showing relevant comments</p></HelperText>}
             {(!showSentimentComments) && <WordDisplayContainer setHideSentimentAnalysis={setHideSentimentAnalysis}commentData={commentData}/>}
             {(!hideSentimentAnalysis) && <SentimentDisplayContainer 
                 sentiments={commentData?.sentiments} 

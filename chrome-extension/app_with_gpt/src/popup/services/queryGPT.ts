@@ -1,6 +1,6 @@
 const axios = require('axios')
 
-const API_URL = 'http://localhost:5000/user-query'
+const API_URL = 'https://lnnqxaqalmxee46exnov3jupsa0srghv.lambda-url.us-east-1.on.aws/'
 
 
 const makeQuery = async (videoId, query) => {

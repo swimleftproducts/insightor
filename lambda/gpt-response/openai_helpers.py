@@ -135,10 +135,6 @@ def generate_chat_completion(query_plus_context, system_prompt=''):
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": query_plus_context}
     ]
-
-    with open('recent_ask.txt', "w") as f:
-        f.write(system_prompt + "\n")
-        f.write(query_plus_context)
     
     params = {
         "model": model_engine,
@@ -161,7 +157,8 @@ def get_HyDE(query,title, k=1):
     HyDE_Prompt = f"""
         Task: A person is looking for youtube comments based on a query. Give {k} example 35 word youtube comment(s) 
         that exactly reword to the query's sentiments. start each comment with #. It is important to match the type of 
-        comments that actually occur. In this case the comments may be rude, or angry, they also may be positive, supportive or neutral.
+        comments that actually occur. The sentiment of the comments should match the sentiment of the query. This is very
+        important. The query may be looking for comments which are rude, or angry, they also may be positive, supportive or neutral, or a combination thereof.
         Video title: {title}
         Query: {query}
         COMMENT:
